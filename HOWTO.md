@@ -246,7 +246,7 @@ I was a bit too impatient to try to get iPython working, so I
 extracted the code and modified it a bit to make it write out the
 results to a series of image files.  Here it is:
 
-*[dream.py](https://raw.githubusercontent.com/spikelynch/deepdream/master/dream.py)*
+**[dream.py](https://raw.githubusercontent.com/spikelynch/deepdream/master/dream.py)**
 
 For this to work, you should download the script to the ~/Dreamer
 directory on your Ubuntu environment, and create a directory called 'Output'.
