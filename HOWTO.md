@@ -23,6 +23,9 @@ following is hard to follow it's probably because I'm not spelling out
 my own tacit knowledge - please drop me a line and I can try to make
 it simpler.
 
+**NOTE:** if you want to get dreaming with a minimum of fuss, [Ryan Kennedy has built a much more user-friendly solution](http://ryankennedy.io/running-the-deep-dream/) which gives you a container with all of the dependencies included and ready to run.  In true Lazyweb fashion, I found out about it when I was two-thirds of the way through writing this document.
+
+
 ## Ubuntu
 
 The first decision I made was to spin up an Ubuntu VM for Caffe,
