@@ -8,7 +8,7 @@ notebook to process images using the
 [Caffe](http://caffe.berkeleyvision.org/) neural network framework,
 based on a model provided on the Google github, making strange things happen:
 
-![Transformation](http://url)
+![Transformation](https://raw.githubusercontent.com/spikelynch/deepdream/master/Rosetta_trans.jpg)
 
 
 This how-to covers the following:
@@ -63,7 +63,7 @@ the same thing as a terminal in Mac OS). Click the red icon in the top
 left corner of the Ubuntu desktop, and you'll get a search field -
 type 'terminal' and hit return to bring up a terminal.
 
-![Ubuntu icon](http://url/)
+![Ubuntu icon](https://raw.githubusercontent.com/spikelynch/deepdream/master/Ubuntu.png)
 
 (The right sidebard of the Ubuntu desktop works like the Mac OS dock.
 If you right-click on the Terminal icon, you can select 'Lock to
@@ -242,7 +242,7 @@ I was a bit too impatient to try to get iPython working, so I
 extracted the code and modified it a bit to make it write out the
 results to a series of image files.  Here it is:
 
-[The modified Python script](url)
+*[dream.py](https://raw.githubusercontent.com/spikelynch/deepdream/master/dream.py)*
 
 For this to work, you should download the script to the ~/Dreamer
 directory on your Ubuntu environment, and create a directory called 'Output'.
