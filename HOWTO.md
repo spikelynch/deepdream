@@ -1,13 +1,17 @@
 DeepDreamer Howto v1.0
 ======================
 
-This is a quick description of how I got the
+This is a description of how I got the
 [deepdream code](https://github.com/google/deepdream/blob/master/dream.ipynb)
 up and running on my MacBook Pro. The code give uses an iPython
 notebook to process images using the
 [Caffe](http://caffe.berkeleyvision.org/) neural network framework,
-based on a model provided on the Google github.  This how-to covers
-the following:
+based on a model provided on the Google github, making strange things happen:
+
+![Transformation](http://url)
+
+
+This how-to covers the following:
 
 * Setting up a virtual OS
 * Installing Caffe and its dependencies
@@ -32,7 +36,9 @@ suggested Ubuntu 14.04.
 
 I already had [Oracle VirtualBox](https://www.virtualbox.org/)
 installed. (It's free and open source, and straightforward to install
-on Macs, so go download it if you don't already have it.)
+on Macs, so go download it if you don't already have it.) This
+basically lets you run another operating system inside a container on
+your Mac (or Windows) box.
 
 I downloaded an Ubuntu image from
 [OSBoxes](http://www.osboxes.org/ubuntu/).
@@ -50,12 +56,14 @@ The default account details for the Ubuntu VM are on the osboxes page.
 
 ## The Ubuntu command line
 
-Ubuntu's UI can seem a bit impenetrable.  Once you log in, you'll get
-the Ubuntu desktop.  To install Caffe and its dependencies, you'll
-need to get a command line terminal running (this is basically the
-same thing as a terminal in Mac OS). Click the red icon in the top
+Ubuntu's UI is impenetrable, even for a Linux.  Once you log in,
+you'll get the Ubuntu desktop.  To install Caffe and its dependencies,
+you'll need to get a command line terminal running (this is basically
+the same thing as a terminal in Mac OS). Click the red icon in the top
 left corner of the Ubuntu desktop, and you'll get a search field -
 type 'terminal' and hit return to bring up a terminal.
+
+![Ubuntu icon](http://url/)
 
 (The right sidebard of the Ubuntu desktop works like the Mac OS dock.
 If you right-click on the Terminal icon, you can select 'Lock to
@@ -90,27 +98,160 @@ Then, download pip:
 
     sudo apt-get install python-pip
 
+## Installing Caffe's dependencies
 
-## Installing Caffe
+These are libraries (bundles of software) which Caffe and its Python
+interface need to be able to run.
 
-I followed [Caffe's installation guide](http://caffe.berkeleyvision.org/installation.html) as closely as possible.  I won't duplicate too much of that, just point out some gotchas.
+### apt-get packages
+
+Here is a list of all the Ubuntu packages I needed.  Note that some of
+these may be surplus to requirements, but it's better to include
+everything:
+
+    sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libboost-all-dev libhdf5-serial-dev
+    sudo apt-get install python-dev
+    sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev protobuf-compiler
+    sudo apt-get install git
+    sudo apt-get install libatlas-base-dev
+    sudo apt-get install python-pip
+    sudo apt-get install python-numpy
+    sudo apt-get install python-scipy
+    sudo apt-get install ipython
+    sudo apt-get install python-protobuf
+
+*apt-get* will prompt you as to whether to install other packages which these ones require: answer yes to everything.
+
+### Python packages
+
+Here's the list of Python packages required for the Caffe interface.
+Some of these may duplicate libraries which you've already
+downloaded - if it warns you that something is already installed,
+don't worry about it.
+
+    sudo pip install Cython
+    sudo pip install scikit-image
+    sudo pip install matplotlib
+    sudo pip install h5py
+    sudo pip install leveldb
+    sudo pip install networkx
+    sudo pip install nose
+    sudo pip install pandas
+    sudo pip install python-dateutil
+    sudo pip install python-gflags
+    sudo pip install pyyaml
+    sudo pip install Pillow
+
+Please let me know if any of these things don't install successfully.
+
+## Getting Caffe from GitHub
 
 Unfortunately, Caffe isn't the sort of software which you can get with
 the package manager - it needs to be compiled on the system it will
-run on.
+run on.  To do this, you need to grab the whole of Caffe's source code from
+GitHub.
 
-### Caffe dependencies
+[Caffe on GitHub](https://github.com/BVLC/caffe)
 
+At the command line in your Ubuntu system, type the following commands
 
+    cd
+    mkdir Dreamer
+    cd Dreamer
+    git clone https://github.com/BVLC/caffe.git
 
-Caffe Dependencies - remember to switch off GPU unless you want to fight with nVidia drivers
+This will create a directory called 'Dreamer' in your home directory,
+and download the Caffe source from GitHub as a directory under that
+one called 'caffe' (If you know enough about GitHub to want to use ssh
+rather than https, that's fine too.)
 
-Python dependencies
+## Building Caffe
 
-Caffe make python
+I followed [Caffe's installation guide](http://caffe.berkeleyvision.org/installation.html) as closely as possible.  I won't duplicate too much of that, just point out some gotchas.
 
-Download the model
+### Prerequisites
 
-# The script
+All of the Caffe prerequisites have been covered by the apt-get and
+pip commands listed above, with the exception of CUDA. CUDA is a set
+of drivers which allow Caffe to run on the GPUs of Nvidia graphics
+cards: you don't need it to run the deepdreams code.
 
-extracted and modified version of the iPython notebook
+The default Caffe config has GPU on by default, so we'll need to fix that:
+
+    cd ~/Dreamer/caffe
+    cp Makefile.config.example Makefile.config
+    gedit Makefile.config
+
+The above commands move you to the caffe directory, copy the default config
+to Makefile.config, and open Gedit, a simple text editor, so that you can
+edit the config to switch GPU mode off.
+
+Near the top of the file should be a couple of lines like:
+
+    # CPU-only switch (uncomment to build without GPU support).
+    # CPU_ONLY := 1
+
+You need to remove the '#' at the start of the second line, so that it looks like: 
+
+    # CPU-only switch (uncomment to build without GPU support).
+    CPU_ONLY := 1
+
+Once you've done that, save your changes.
+
+### Compiling Caffe
+
+To compile Caffe, type the following command:
+
+    make all
+
+This will take a while, and will produce another stream of messages
+from the compiler.
+
+### Compiling the Python interface
+
+You need to compile the Python interface to Caffe separately:
+
+    make pycaffe
+
+You will also need to add a line to your profile in Ubuntu: this sets
+an environment variable to tell Python where to find the Caffe libraries.
+
+    gedit ~/.profile
+
+Once you've opened the .profile file, add the following line at the bottom:
+
+    export PYTHONPATH="$HOME/Dreamer/caffe/python:$PYTHONPATH"
+
+After you've added this line, you should restart your Ubuntu environment
+
+### Downloading the model
+
+You need to download a copy of the GoogleNet neural net model: this is
+available from [BVLC's GitHub](https://github.com/BVLC/caffe/tree/master/models/bvlc_googlenet).
+
+The simplest way to get it installed in your Ubuntu container is to open Firefox in Ubuntu and go to the URL above.  You should save the file in this directory:
+
+    ~/Dreamer/caffe/models/bvlc_googlenet/
+
+## Downloading and running the dreams.py script
+
+The original dreams script is an iPython notebook, which runs as a
+kind of interactive presentation with embedded code and output images.
+
+I was a bit too impatient to try to get iPython working, so I
+extracted the code and modified it a bit to make it write out the
+results to a series of image files.  Here it is:
+
+[The modified Python script](url)
+
+For this to work, you should download the script to the ~/Dreamer
+directory on your Ubuntu environment, and create a directory called 'Output'.
+
+The simplest way to get a source image is to find something on the web and download it to ~/Dreamer: 
+
+    cd ~/Dreamer
+    mkdir Output
+    ./dream.py your_image.jpg
+
+If all goes well, the script will start dreaming.  You should get 40 output files written into Output: these are progressive stages of the iterations of the dreamer algorithm.
+
