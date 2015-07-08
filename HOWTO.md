@@ -25,6 +25,7 @@ it simpler.
 
 **NOTE:** if you want to get dreaming with a minimum of fuss, [Ryan Kennedy has built a much more user-friendly solution](http://ryankennedy.io/running-the-deep-dream/) which gives you a container with all of the dependencies included and ready to run.  In true Lazyweb fashion, I found out about it when I was two-thirds of the way through writing this document.
 
+See [this gallery](https://photos.google.com/album/AF1QipNzyzWbHZcJvIsmuQhVlxlAXXPj58m0DPujmdms) for examples of images I've generated with this code.
 
 ## Ubuntu
 
@@ -258,3 +259,5 @@ The simplest way to get a source image is to find something on the web and downl
 
 If all goes well, the script will start dreaming.  You should get 40 output files written into Output: these are progressive stages of the iterations of the dreamer algorithm.
 
+
+Drop me a line via [my GitHub profile](https://github.com/spikelynch/) if you have any comments or corrections to this.
