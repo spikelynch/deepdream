@@ -7,9 +7,18 @@ import scipy.ndimage as nd
 import PIL.Image
 from IPython.display import clear_output, Image, display
 from google.protobuf import text_format
+
+import argparse
 import re
 import sys
 import caffe
+
+MODELS = {
+    'bvlc_googlenet': 'inception_4c/output',
+    'googlenet_places205': 'inception_4c/output'
+}
+
+models = MODELS.keys()
 
 def showarray(a, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 255))
@@ -21,23 +30,26 @@ def writearray(a, filename, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 255))
     PIL.Image.fromarray(a).save(filename, fmt)
 
-
-
-model_path = '../caffe/models/bvlc_googlenet/' # substitute your path here
 output_path = 'Output/'
-net_fn   = model_path + 'deploy.prototxt'
-param_fn = model_path + 'bvlc_googlenet.caffemodel'
+default_layer = None
 
-# Patching model to be able to compute gradients.
-# Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
-model = caffe.io.caffe_pb2.NetParameter()
-text_format.Merge(open(net_fn).read(), model)
-model.force_backward = True
-open('tmp.prototxt', 'w').write(str(model))
+def load_net(model):
+    model_path = '../caffe/models/' + model + '/'
+    net_fn   = model_path + 'deploy.prototxt'
+    param_fn = model_path + model + '.caffemodel'
+    default_layer = MODELS[model]
 
-net = caffe.Classifier('tmp.prototxt', param_fn,
-                       mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
-                       channel_swap = (2,1,0)) # the reference model has channels in BGR order instead of RGB
+    # Patching model to be able to compute gradients.
+    # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
+    model = caffe.io.caffe_pb2.NetParameter()
+    text_format.Merge(open(net_fn).read(), model)
+    model.force_backward = True
+    open('tmp.prototxt', 'w').write(str(model))
+
+    net = caffe.Classifier('tmp.prototxt', param_fn,
+                           mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
+                           channel_swap = (2,1,0)) # the reference model has channels in BGR order instead of RGB
+    return net
 
 # a couple of utility functions for converting to and from Caffe's input image layout
 def preprocess(net, img):
@@ -45,7 +57,7 @@ def preprocess(net, img):
 def deprocess(net, img):
     return np.dstack((img + net.transformer.mean['data'])[::-1])
 
-def make_step(net, step_size=1.5, end='inception_4c/output', jitter=32, clip=True):
+def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True):
     '''Basic gradient ascent step.'''
 
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
@@ -68,7 +80,7 @@ def make_step(net, step_size=1.5, end='inception_4c/output', jitter=32, clip=Tru
         src.data[:] = np.clip(src.data, -bias, 255-bias)
 
 
-def deepdream(net, base_img, base_file, iter_n=10, octave_n=4, octave_scale=1.4, end='inception_4c/output', clip=True, **step_params):
+def deepdream(net, base_img, base_file, iter_n=10, octave_n=4, octave_scale=1.4, end=default_layer, clip=True, **step_params):
     # prepare base images for all octaves
     octaves = [preprocess(net, base_img)]
     for i in xrange(octave_n-1):
@@ -104,26 +116,39 @@ def deepdream(net, base_img, base_file, iter_n=10, octave_n=4, octave_scale=1.4,
     # returning the resulting image
     return deprocess(net, src.data[0])
 
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        origfile = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("s",        type=str, help="The source image")
+    parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='bvlc_googlenet')
+    parser.add_argument("-l", "--layer", type=str, help="The layer", default="inception_4c/output")
+    parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
+    parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
+
+    args = parser.parse_args()
+
+    origfile = args.s 
+
+    p = re.compile('^(.*)\.jpg')
+
+    m = p.match(origfile)
+
+    if m:
+        basefile = output_path + m.group(1)
     else:
-        origfile = 'sky1024px.jpg' 
-
-p = re.compile('^(.*)\.jpg')
-
-m = p.match(origfile)
-
-if m:
-    basefile = output_path + m.group(1)
-else:
-    basefile = output_path + 'output'
+        basefile = output_path + 'output'
     
-print "Loading %s" % origfile
+    print "Loading %s" % origfile
 
-img = np.float32(PIL.Image.open(origfile))
+    img = np.float32(PIL.Image.open(origfile))
 
-print "Dreaming..."
-results = deepdream(net, img, basefile)
+    print "Starting neural net..."
 
-print "Done"
+    net = load_net(args.model)
+
+    print "Dreaming..."
+
+    results = deepdream(net, img, basefile, iter_n=args.iters, octave_n=args.octaves, end=args.layer)
+
+
+    print "Done"
