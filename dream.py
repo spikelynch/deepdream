@@ -18,6 +18,9 @@ MODELS = {
     'googlenet_places205': 'inception_4c/output'
 }
 
+# inception layers (for both of the above)
+# 3a, 3b, 4a, 4b, 4c, 4d, 4e, 5a, 5b
+
 models = MODELS.keys()
 
 def showarray(a, fmt='jpeg'):
@@ -57,7 +60,10 @@ def preprocess(net, img):
 def deprocess(net, img):
     return np.dstack((img + net.transformer.mean['data'])[::-1])
 
-def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True):
+def objective_L2(dst):
+    dst.diff[:] = dst.data
+
+def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objective=objective_L2):
     '''Basic gradient ascent step.'''
 
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
@@ -67,7 +73,8 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True):
     src.data[0] = np.roll(np.roll(src.data[0], ox, -1), oy, -2) # apply jitter shift
             
     net.forward(end=end)
-    dst.diff[:] = dst.data  # specify the optimization objective
+    objective(dst)           # new parametrised objective
+    #dst.diff[:] = dst.data  # specify the optimization objective
     net.backward(start=end)
     g = src.diff[0]
     # apply normalized ascent step to the input image
@@ -117,11 +124,38 @@ def deepdream(net, base_img, base_file, iter_n=10, octave_n=4, octave_scale=1.4,
     return deprocess(net, src.data[0])
 
 
+def make_objective_guide(net, guide, end):
+    h, w = guide.shape[:2]
+    src, dst = net.blobs['data'], net.blobs[end]
+    src.reshape(1, 3, h, w)
+    src.data[0] = preprocess(net, guide)
+    net.forward(end=end)
+    print "Guide shape = %d %d" % ( h, w )
+    guide_features = dst.data[0].copy()
+    return lambda dst: objective_guide(guide_features, dst)
+    
+def objective_guide(guide_features, dst):
+    x = dst.data[0].copy()
+    y = guide_features
+    print "x shape, size", x.shape, x.size
+    print "y shape, size", y.shape, y.size
+    ch = x.shape[0]
+    print "reshape to %d" % ch
+    x = x.reshape(ch,-1)
+    y = y.reshape(ch,-1)
+    print "afterwards y shape, size", y.shape, y.size
+    A = x.T.dot(y) # compute the matrix of dot-products with guide features
+    dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
+
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("s",        type=str, help="The source image")
     parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='bvlc_googlenet')
     parser.add_argument("-l", "--layer", type=str, help="The layer", default="inception_4c/output")
+    parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
+    parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
     parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
 
@@ -148,7 +182,13 @@ if __name__ == '__main__':
 
     print "Dreaming..."
 
-    results = deepdream(net, img, basefile, iter_n=args.iters, octave_n=args.octaves, end=args.layer)
+    if args.guide:
+        guide = np.float32(PIL.Image.open(args.guide))
+        guide_layer = args.guidelayer
+        obj_guide = make_objective_guide(net, guide, guide_layer)
+        results = deepdream(net, img, basefile, iter_n=args.iters, octave_n=args.octaves, end=args.layer, objective=obj_guide)
+    else:
+        results = deepdream(net, img, basefile, iter_n=args.iters, octave_n=args.octaves, end=args.layer)
 
 
     print "Done"
