@@ -11,6 +11,7 @@ from google.protobuf import text_format
 import argparse
 import re
 import sys
+import os
 import caffe
 
 MODELS = {
@@ -55,8 +56,10 @@ def load_net(model):
     return net
 
 # a couple of utility functions for converting to and from Caffe's input image layout
+
 def preprocess(net, img):
     return np.float32(np.rollaxis(img, 2)[::-1]) - net.transformer.mean['data']
+
 def deprocess(net, img):
     return np.dstack((img + net.transformer.mean['data'])[::-1])
 
@@ -87,7 +90,7 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
         src.data[:] = np.clip(src.data, -bias, 255-bias)
 
 
-def deepdream(net, base_img, base_file, iter_n=10, octave_n=4, octave_scale=1.4, end=default_layer, clip=True, **step_params):
+def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_scale=1.4, end=default_layer, clip=True, **step_params):
     # prepare base images for all octaves
     octaves = [preprocess(net, base_img)]
     for i in xrange(octave_n-1):
@@ -113,10 +116,10 @@ def deepdream(net, base_img, base_file, iter_n=10, octave_n=4, octave_scale=1.4,
                 vis = vis*(255.0/np.percentile(vis, 99.98))
             #showarray(vis)
             print octave, i, end #, vis.shape
-            filename = "%s_%d_%i.jpg" % ( base_file, octave, i ) 
-            writearray(vis, filename)
-            print "Wrote %s" % filename
-            #clear_output(wait=True)
+            if verbose_file:
+                filename = "%s_%d_%i.jpg" % ( base_file, octave, i ) 
+                writearray(vis, filename)
+                print "Wrote %s" % filename
             
         # extract details produced on the current octave
         detail = src.data[0]-octave_base
@@ -130,24 +133,23 @@ def make_objective_guide(net, guide, end):
     src.reshape(1, 3, h, w)
     src.data[0] = preprocess(net, guide)
     net.forward(end=end)
-    print "Guide shape = %d %d" % ( h, w )
     guide_features = dst.data[0].copy()
     return lambda dst: objective_guide(guide_features, dst)
     
 def objective_guide(guide_features, dst):
     x = dst.data[0].copy()
     y = guide_features
-    print "x shape, size", x.shape, x.size
-    print "y shape, size", y.shape, y.size
     ch = x.shape[0]
-    print "reshape to %d" % ch
     x = x.reshape(ch,-1)
     y = y.reshape(ch,-1)
-    print "afterwards y shape, size", y.shape, y.size
     A = x.T.dot(y) # compute the matrix of dot-products with guide features
     dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
 
 
+    
+
+
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -158,19 +160,26 @@ if __name__ == '__main__':
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
     parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
-
+    parser.add_argument("-v", "--verbose", action='store_true', help="Dump out a file for every iteration", default=False)
+    parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=.05)
+    parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
+    parser.add_argument("-d", "--dir", type=str, help="Directory for output jpgs", default=output_path)
     args = parser.parse_args()
 
     origfile = args.s 
 
     p = re.compile('^(.*)\.jpg')
-
     m = p.match(origfile)
-
     if m:
-        basefile = output_path + m.group(1)
+        bfile = os.path.join(args.dir, m.group(1))
     else:
-        basefile = output_path + 'output'
+        bfile = os.path.join(args.dir, 'output')
+
+    # format: "$BASEIMG_fZ.jpg" or "$BASEIMG_O_I.jpg" for verbose
+    
+    vfile = None
+    if args.verbose:
+        vfile = bfile
     
     print "Loading %s" % origfile
 
@@ -181,14 +190,27 @@ if __name__ == '__main__':
     net = load_net(args.model)
 
     print "Dreaming..."
-
+    
     if args.guide:
         guide = np.float32(PIL.Image.open(args.guide))
         guide_layer = args.guidelayer
         obj_guide = make_objective_guide(net, guide, guide_layer)
-        results = deepdream(net, img, basefile, iter_n=args.iters, octave_n=args.octaves, end=args.layer, objective=obj_guide)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=args.layer, objective=obj_guide)
     else:
-        results = deepdream(net, img, basefile, iter_n=args.iters, octave_n=args.octaves, end=args.layer)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=args.layer)
 
+    # default value of args.frames is 1
+
+    h, w = img.shape[:2]
+    s = args.zoom
+    fi = 0
+    for i in xrange(args.frames):
+        img = dreamer(img)
+        filename = "%s_f%d.jpg" % ( bfile, fi )
+        writearray(img, filename)
+        print "Wrote frame %s" % filename
+        img = nd.affine_transform(img, [1-s,1-s,1], [h*s/2,w*s/2,0], order=1)
+        fi += 1
+        
 
     print "Done"
