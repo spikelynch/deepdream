@@ -156,6 +156,7 @@ if __name__ == '__main__':
     parser.add_argument("s",        type=str, help="The source image")
     parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='bvlc_googlenet')
     parser.add_argument("-l", "--layer", type=str, help="The layer", default="inception_4c/output")
+    parser.add_argument("-b", "--basefile", type=str, help="Base filename", default=None)
     parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
@@ -164,16 +165,20 @@ if __name__ == '__main__':
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=.05)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
     parser.add_argument("-d", "--dir", type=str, help="Directory for output jpgs", default=output_path)
+    parser.add_argument("-k", "--keys", action='store_true', help="Dump a list of available layers", default=False)
     args = parser.parse_args()
 
     origfile = args.s 
 
-    p = re.compile('^(.*)\.jpg')
-    m = p.match(origfile)
-    if m:
-        bfile = os.path.join(args.dir, m.group(1))
+    if args.basefile:
+        bfile = os.path.join(args.dir, args.basefile)
     else:
-        bfile = os.path.join(args.dir, 'output')
+        p = re.compile('^(.*)\.jpg')
+        m = p.match(origfile)
+        if m:
+            bfile = os.path.join(args.dir, m.group(1))
+        else:
+            bfile = os.path.join(args.dir, 'output')
 
     # format: "$BASEIMG_fZ.jpg" or "$BASEIMG_O_I.jpg" for verbose
     
@@ -189,6 +194,13 @@ if __name__ == '__main__':
 
     net = load_net(args.model)
 
+    if args.keys:
+        print "Layers" 
+        for k in net.blobs.keys():
+            print k
+        exit()
+
+    
     print "Dreaming..."
     
     if args.guide:
