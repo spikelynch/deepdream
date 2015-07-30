@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'greyfriars.jpg'
-file = 'recipe.txt'
+origfile = 'theGap.jpg'
+model = 'places'
+recipe = 'places_layers.txt'
 script = './dream.py'
+path = 'PlacesSpectrum'
 
 content = None
 
-with open(file) as f:
+with open(recipe) as f:
     content = [ x.strip('\n') for x in f.readlines() ]
 
 if not content:
@@ -18,9 +20,12 @@ if not content:
 
 tt = string.maketrans('/', '_')
     
-for layer in content:
-    safelayer = layer.translate(tt)
-    a = [ script, "--layer", layer, "--basefile", safelayer, origfile]
+for line in content:
+    fields = line.split()
+    model = fields[0]
+    layer = fields[1]
+    safelayer = os.path.join(path, layer.translate(tt))
+    a = [ script, "--model", model, "--layer", layer, "--basefile", safelayer, origfile]
     print ' '.join(a)
     subprocess.call(a)
     

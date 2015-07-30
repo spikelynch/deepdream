@@ -14,10 +14,34 @@ import sys
 import os
 import caffe
 
+
 MODELS = {
-    'bvlc_googlenet': 'inception_4c/output',
-    'googlenet_places205': 'inception_4c/output'
+    'googlenet': 'bvlc_googlenet',
+    'places': 'googlenet_places205',
+    'oxford': 'oxford102',
+    'cnn_age': 'cnn_age',
+    'cnn_gender': 'cnn_gender',
+    'caffenet': 'bvlc_reference_caffenet',
+    'ilsvrc13': 'bvlc_reference_rcnn_ilsvrc13',
+    'flickr_style': 'finetune_flickr_style'
 }
+
+DEFAULT_LAYERS = {
+    'googlenet': 'inception_4c/output',
+    'places': 'inception_4c/output',
+    'cnn_age': 'pool5',
+    'cnn_gender': 'pool5',
+    'oxford': 'pool5',
+    'cars': 'pool5',
+    'caffenet': 'pool5',
+    'ilsvrc13': 'pool5',
+    'flickr_style': 'pool5'
+}
+
+MEAN_BINARIES = {
+    'cnn_age': 'cnn_age_gender/mean.binaryproto',
+}
+
 
 # inception layers (for both of the above)
 # 3a, 3b, 4a, 4b, 4c, 4d, 4e, 5a, 5b
@@ -34,15 +58,32 @@ def writearray(a, filename, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 255))
     PIL.Image.fromarray(a).save(filename, fmt)
 
+    
+def loadmean(filename):
+    proto_data = open(filename, "rb").read()
+    a = caffe.io.caffe_pb2.BlobProto.FromString(proto_data)
+    mean  = caffe.io.blobproto_to_array(a)[0]
+    print "Loaded mean binary %s" % filename
+    print mean.shape
+    return mean
+    
 output_path = 'Output/'
 default_layer = None
 
-def load_net(model):
+def load_net(model_name):
+    model = MODELS[model_name]
     model_path = '../caffe/models/' + model + '/'
     net_fn   = model_path + 'deploy.prototxt'
     param_fn = model_path + model + '.caffemodel'
-    default_layer = MODELS[model]
+    default_layer = DEFAULT_LAYERS[model_name]
 
+    # load mean binary if it's defined
+
+    if model in MEAN_BINARIES:
+        mean = loadmean('../caffe/models/' + MEAN_BINARIES[model])
+    else:
+        mean = np.float32([104.0, 116.0, 122.0])
+        
     # Patching model to be able to compute gradients.
     # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
     model = caffe.io.caffe_pb2.NetParameter()
@@ -51,7 +92,7 @@ def load_net(model):
     open('tmp.prototxt', 'w').write(str(model))
 
     net = caffe.Classifier('tmp.prototxt', param_fn,
-                           mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
+                           mean=mean, # ImageNet mean, training set dependent
                            channel_swap = (2,1,0)) # the reference model has channels in BGR order instead of RGB
     return net
 
@@ -117,7 +158,7 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
             #showarray(vis)
             print octave, i, end #, vis.shape
             if verbose_file:
-                filename = "%s_%d_%i.jpg" % ( base_file, octave, i ) 
+                filename = "%s_%d_%i.jpg" % ( verbose_file, octave, i ) 
                 writearray(vis, filename)
                 print "Wrote %s" % filename
             
@@ -154,8 +195,8 @@ def objective_guide(guide_features, dst):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("s",        type=str, help="The source image")
-    parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='bvlc_googlenet')
-    parser.add_argument("-l", "--layer", type=str, help="The layer", default="inception_4c/output")
+    parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='googlenet')
+    parser.add_argument("-l", "--layer", type=str, help="The layer")
     parser.add_argument("-b", "--basefile", type=str, help="Base filename", default=None)
     parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
@@ -164,6 +205,7 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", action='store_true', help="Dump out a file for every iteration", default=False)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=.05)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
+    parser.add_argument("-j", "--initial", type=int, help="Initial frame #", default=0)
     parser.add_argument("-d", "--dir", type=str, help="Directory for output jpgs", default=output_path)
     parser.add_argument("-k", "--keys", action='store_true', help="Dump a list of available layers", default=False)
     args = parser.parse_args()
@@ -190,6 +232,7 @@ if __name__ == '__main__':
 
     img = np.float32(PIL.Image.open(origfile))
 
+
     print "Starting neural net..."
 
     net = load_net(args.model)
@@ -200,6 +243,10 @@ if __name__ == '__main__':
             print k
         exit()
 
+    if args.layer:
+        layer = args.layer
+    else:
+        layer = DEFAULT_LAYERS[args.model]
     
     print "Dreaming..."
     
@@ -207,15 +254,15 @@ if __name__ == '__main__':
         guide = np.float32(PIL.Image.open(args.guide))
         guide_layer = args.guidelayer
         obj_guide = make_objective_guide(net, guide, guide_layer)
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=args.layer, objective=obj_guide)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
     else:
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=args.layer)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
 
     # default value of args.frames is 1
 
     h, w = img.shape[:2]
     s = args.zoom
-    fi = 0
+    fi = args.initial
     for i in xrange(args.frames):
         img = dreamer(img)
         filename = "%s_f%d.jpg" % ( bfile, fi )
