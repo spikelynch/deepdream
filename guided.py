@@ -4,13 +4,13 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'theGap.jpg'
+origfile = 'noise.jpg'
 guide = 'Beatrice_Dante_512.jpg'
-recipe = 'googlenet_layers.txt'
+recipe = 'Layers/db_layers_100.txt'
 model = 'googlenet'
 script = './dream.py'
-path = 'Guided'
-iters = '12'
+path = 'Guided450'
+iters = '100'
 octaves = '4'
 
 content = None
