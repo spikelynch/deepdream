@@ -12,6 +12,7 @@ import argparse
 import re
 import sys
 import os
+
 import caffe
 
 
@@ -58,7 +59,7 @@ def writearray(a, filename, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 255))
     PIL.Image.fromarray(a).save(filename, fmt)
 
-    
+
 def loadmean(filename):
     proto_data = open(filename, "rb").read()
     a = caffe.io.caffe_pb2.BlobProto.FromString(proto_data)
@@ -66,7 +67,7 @@ def loadmean(filename):
     print "Loaded mean binary %s" % filename
     print mean.shape
     return mean
-    
+
 output_path = 'Output/'
 default_layer = None
 
@@ -83,7 +84,7 @@ def load_net(model_name):
         mean = loadmean('../caffe/models/' + MEAN_BINARIES[model])
     else:
         mean = np.float32([104.0, 116.0, 122.0])
-        
+
     # Patching model to be able to compute gradients.
     # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
     model = caffe.io.caffe_pb2.NetParameter()
@@ -115,7 +116,7 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
 
     ox, oy = np.random.randint(-jitter, jitter+1, 2)
     src.data[0] = np.roll(np.roll(src.data[0], ox, -1), oy, -2) # apply jitter shift
-            
+
     net.forward(end=end)
     objective(dst)           # new parametrised objective
     #dst.diff[:] = dst.data  # specify the optimization objective
@@ -125,7 +126,7 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
     src.data[:] += step_size/np.abs(g).mean() * g
 
     src.data[0] = np.roll(np.roll(src.data[0], -ox, -1), -oy, -2) # unshift image
-            
+
     if clip:
         bias = net.transformer.mean['data']
         src.data[:] = np.clip(src.data, -bias, 255-bias)
@@ -136,7 +137,7 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
     octaves = [preprocess(net, base_img)]
     for i in xrange(octave_n-1):
         octaves.append(nd.zoom(octaves[-1], (1, 1.0/octave_scale,1.0/octave_scale), order=1))
-    
+
     src = net.blobs['data']
     detail = np.zeros_like(octaves[-1]) # allocate image for network-produced details
     for octave, octave_base in enumerate(octaves[::-1]):
@@ -150,7 +151,7 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
         src.data[0] = octave_base+detail
         for i in xrange(iter_n):
             make_step(net, end=end, clip=clip, **step_params)
-            
+
             # visualization
             vis = deprocess(net, src.data[0])
             if not clip: # adjust image contrast if clipping is disabled
@@ -158,10 +159,10 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
             #showarray(vis)
             print octave, i, end #, vis.shape
             if verbose_file:
-                filename = "%s_%d_%i.jpg" % ( verbose_file, octave, i ) 
+                filename = "%s_%d_%i.jpg" % ( verbose_file, octave, i )
                 writearray(vis, filename)
                 print "Wrote %s" % filename
-            
+
         # extract details produced on the current octave
         detail = src.data[0]-octave_base
     # returning the resulting image
@@ -176,7 +177,7 @@ def make_objective_guide(net, guide, end):
     net.forward(end=end)
     guide_features = dst.data[0].copy()
     return lambda dst: objective_guide(guide_features, dst)
-    
+
 def objective_guide(guide_features, dst):
     x = dst.data[0].copy()
     y = guide_features
@@ -187,10 +188,10 @@ def objective_guide(guide_features, dst):
     dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
 
 
-    
+
+#def autofile(args):
 
 
-    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -210,24 +211,26 @@ if __name__ == '__main__':
     parser.add_argument("-k", "--keys", action='store_true', help="Dump a list of available layers", default=False)
     args = parser.parse_args()
 
-    origfile = args.s 
+    origfile = args.s
 
     if args.basefile:
         bfile = os.path.join(args.dir, args.basefile)
     else:
-        p = re.compile('^(.*)\.jpg')
-        m = p.match(origfile)
-        if m:
-            bfile = os.path.join(args.dir, m.group(1))
-        else:
-            bfile = os.path.join(args.dir, 'output')
+        f, e = os.path.splitext(os.path.basename(origfile))
+        if e != '.jpg':
+            print "Input must be a jpg"
+            print "Got %s/%s" % ( f, e )
+            sys.exit(-1)
+        bfile = os.path.join(args.dir, f)
+
+
 
     # format: "$BASEIMG_fZ.jpg" or "$BASEIMG_O_I.jpg" for verbose
-    
+
     vfile = None
     if args.verbose:
         vfile = bfile
-    
+
     print "Loading %s" % origfile
 
     img = np.float32(PIL.Image.open(origfile))
@@ -238,7 +241,7 @@ if __name__ == '__main__':
     net = load_net(args.model)
 
     if args.keys:
-        print "Layers" 
+        print "Layers"
         for k in net.blobs.keys():
             print k
         exit()
@@ -247,9 +250,9 @@ if __name__ == '__main__':
         layer = args.layer
     else:
         layer = DEFAULT_LAYERS[args.model]
-    
+
     print "Dreaming..."
-    
+
     if args.guide:
         guide = np.float32(PIL.Image.open(args.guide))
         guide_layer = args.guidelayer
@@ -271,6 +274,6 @@ if __name__ == '__main__':
         if s != 0:
             img = nd.affine_transform(img, [1-s,1-s,1], [h*s/2,w*s/2,0], order=1)
         fi += 1
-        
+
 
     print "Done"
