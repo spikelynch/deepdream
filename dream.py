@@ -15,6 +15,7 @@ import os
 
 import caffe
 
+CAFFE_MODELS = '../caffe/models/'
 
 MODELS = {
     'googlenet': 'bvlc_googlenet',
@@ -73,9 +74,9 @@ default_layer = None
 
 def load_net(model_name):
     model = MODELS[model_name]
-    model_path = '../caffe/models/' + model + '/'
-    net_fn   = model_path + 'deploy.prototxt'
-    param_fn = model_path + model + '.caffemodel'
+    model_path = os.path.join(CAFFE_MODELS, model)
+    net_fn   = os.path.join(model_path, 'deploy.prototxt')
+    param_fn = os.path.join(model_path, model + '.caffemodel')
     default_layer = DEFAULT_LAYERS[model_name]
 
     # load mean binary if it's defined

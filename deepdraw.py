@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 # coding: utf-8
 
@@ -12,10 +12,23 @@ from scipy.misc import imresize
 
 import caffe
 
-model_name = "GoogLeNet"
-model_path = '/your/path/here/caffe_models/bvlc_googlenet/' # substitute your path here
-net_fn   = './deploy_googlenet_updated.prototxt'
-param_fn = model_path + 'bvlc_googlenet.caffemodel'
+CAFFE_MODELS = '../caffe/models/'
+
+OUTPUT_DIR = './Output'
+
+IMAGENET_CLASS = 1
+ALL_FRAMES = False
+
+model = "bvlc_googlenet"
+model_path = os.path.join(CAFFE_MODELS, model)
+net_fn   = os.path.join(model_path, 'deploy_googlenet_updated.prototxt')
+param_fn = os.path.join(model_path, model + '.caffemodel')
+
+
+#model_path = '/your/path/here/caffe_models/bvlc_googlenet/' # substitute your path here
+#net_fn   = './deploy_googlenet_updated.prototxt'
+#param_fn = model_path + 'bvlc_googlenet.caffemodel'
+
 mean = np.float32([104.0, 117.0, 123.0])
 
 net = caffe.Classifier(net_fn, param_fn,
@@ -43,7 +56,8 @@ def showarray(a, f, fmt='jpeg'):
 
 def writearray(a, filename, fmt='jpeg'):
     a = np.uint8(np.clip(a, 0, 255))
-    PIL.Image.fromarray(a).save(filename, fmt)
+    path = os.path.join(OUTPUT_DIR, filename)
+    PIL.Image.fromarray(a).save(path, fmt)
 
 
 # Definition of the main gradient ascent functions. Note that these are based on the [deepdream code](https://github.com/google/deepdream/blob/master/dream.ipynb) published by Google as well as [this code](https://github.com/kylemcdonald/deepdream/blob/master/dream.ipynb) by Kyle McDonald.
@@ -76,9 +90,10 @@ def make_step(net, step_size=1.5, end='inception_4c/output', clip=True, focus=No
     # reset objective for next step
     dst.diff.fill(0.)
 
-def deepdraw(net, base_img, octaves, random_crop=True, visualize=True, focus=None,
+def deepdraw(net, base_img, octaves, random_crop=True, visualize=False, focus=None,
     clip=True, **step_params):
 
+    print "Target imageclass = %d" % focus
     # prepare base image
     image = preprocess(net, base_img) # (3,224,224)
 
@@ -134,7 +149,7 @@ def deepdraw(net, base_img, octaves, random_crop=True, visualize=True, focus=Non
                 if not clip: # adjust image contrast if clipping is disabled
                     vis = vis*(255.0/np.percentile(vis, 99.98))
                 if i % 1 == 0:
-                    showarray(vis,"./filename"+str(i)+".jpg")
+                    writearray(vis, "./octave%d_f%d.jpg" % ( e, i ))
 
             if i % 10 == 0:
                 print 'finished step %d in octave %d' % (i,e)
@@ -143,7 +158,7 @@ def deepdraw(net, base_img, octaves, random_crop=True, visualize=True, focus=Non
             image[:,ox:ox+w,oy:oy+h] = src.data[0]
 
         print "octave %d image:" % e
-        showarray(deprocess(net, image),"./octave_"+str(e)+".jpg")
+        writearray(deprocess(net, image),"./octave_"+str(e)+".jpg")
 
     # returning the resulting image
     return deprocess(net, image)
@@ -205,27 +220,25 @@ octaves = [
     }
 ]
 
+
 # get original input size of network
 original_w = net.blobs['data'].width
 original_h = net.blobs['data'].height
 # the background color of the initial image
 background_color = np.float32([200.0, 200.0, 200.0])
-# generate initial random image
-gen_image = np.random.normal(background_color, 8, (original_w, original_h, 3))
-
-# which imagenet class to visualize
-imagenet_class = 13
-
-# generate class visualization via octavewise gradient ascent
-gen_image = deepdraw(net, gen_image, octaves, focus=imagenet_class,
-                 random_crop=True, visualize=False)
 
 
+for ic in [ 2, 3 ]:
 
-# save image
-img_fn = '_'.join([model_name, "deepdraw", str(imagenet_class)+'.png'])
+    # generate initial random image
+    gen_image = np.random.normal(background_color, 8, (original_w, original_h, 3))
 
-PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
+    # generate class visualization via octavewise gradient ascent
+    gen_image = deepdraw(net, gen_image, octaves, focus=ic,
+                         random_crop=True, visualize=ALL_FRAMES)
+    # save image
+    img_fn = '_'.join([model, "deepdraw", str(ic)+'.png'])
+    PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
 
 
 # This choice of octave parameters tends to give more coherent images, but has a little bit less detail.
