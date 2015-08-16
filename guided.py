@@ -4,13 +4,12 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'noise.jpg'
-guide = 'Beatrice_Dante_512.jpg'
-recipe = 'Layers/db_layers_100.txt'
-model = 'googlenet'
+origfile = 'Input/noise.jpg'
+guide = 'Input/Cells1.jpg'
+recipe = 'Layers/inception_output_layers.txt'
 script = './dream.py'
-path = 'Guided450'
-iters = '100'
+path = 'CellNoise'
+iters = '25'
 octaves = '4'
 
 content = None
@@ -24,10 +23,10 @@ if not content:
 tt = string.maketrans('/', '_')
 
 for line in content:
-    #fields = line.split()
-    #model = fields[0]
-    layer = line
-    safelayer = os.path.join(path, layer.translate(tt))
+    fields = line.split()
+    model = fields[0]
+    layer = fields[1]
+    safelayer = os.path.join(path, model + '_' + layer.translate(tt))
     a = [ script, "--guide", guide, "--guidelayer", layer, "--model", model, "--layer", "inception_4c/output", "--basefile", safelayer, "--iters", iters, "--octaves", octaves, origfile]
     print ' '.join(a)
     subprocess.call(a)

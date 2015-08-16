@@ -14,10 +14,16 @@ import caffe
 
 CAFFE_MODELS = '../caffe/models/'
 
-OUTPUT_DIR = './Output'
+OUTPUT_DIR = './Output/Deepdraw'
 
 IMAGENET_CLASS = 1
 ALL_FRAMES = False
+
+# guacamole, consomme, ice cream, pretzel, bagel, cheeseburger, hot dog, pomegranate, pizza, chocolate sauce
+
+# CLASSLIST = [ 924, 925, 928, 931, 932, 933, 934, 957, 963, 960 ]
+
+CLASSLIST = [ 929 ]
 
 model = "bvlc_googlenet"
 model_path = os.path.join(CAFFE_MODELS, model)
@@ -40,6 +46,8 @@ def preprocess(net, img):
     return np.float32(np.rollaxis(img, 2)[::-1]) - net.transformer.mean['data']
 def deprocess(net, img):
     return np.dstack((img + net.transformer.mean['data'])[::-1])
+
+
 
 def blur(img, sigma):
     if sigma > 0:
@@ -67,6 +75,7 @@ def writearray(a, filename, fmt='jpeg'):
 def make_step(net, step_size=1.5, end='inception_4c/output', clip=True, focus=None, sigma=None):
     '''Basic gradient ascent step.'''
 
+    print "make_step focus = %d end = %s" % ( focus, end )
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
 
     dst = net.blobs[end]
@@ -227,8 +236,9 @@ original_h = net.blobs['data'].height
 # the background color of the initial image
 background_color = np.float32([200.0, 200.0, 200.0])
 
+print "Original image size = %d, %d" % ( original_w, original_h )
 
-for ic in [ 2, 3 ]:
+for ic in CLASSLIST:
 
     # generate initial random image
     gen_image = np.random.normal(background_color, 8, (original_w, original_h, 3))
@@ -238,7 +248,8 @@ for ic in [ 2, 3 ]:
                          random_crop=True, visualize=ALL_FRAMES)
     # save image
     img_fn = '_'.join([model, "deepdraw", str(ic)+'.png'])
-    PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
+    writearray(gen_image, img_fn)
+    #PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
 
 
 # This choice of octave parameters tends to give more coherent images, but has a little bit less detail.

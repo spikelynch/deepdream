@@ -4,15 +4,16 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'solid_noise.jpg'
+origfile = 'Input/branches.jpg'
 script = './dream.py'
-recipe = './reverse_layers.txt'
-iters = '2'
-octaves = '4'
-frames = '40'
-basefile = 'Dive2/arch'
+recipe = './Layers/gnet_all_layers.txt'
+iters = '5'
+octaves = '3'
+frames = '20'
+basefile = 'Dive3/goog'
 startframe = 0
-zoom = '0'
+zoom = '0.02'
+rotate = 5
 
 with open(recipe) as f:
     content = [ x.strip('\n') for x in f.readlines() ]
@@ -35,7 +36,7 @@ f = int(frames)
 lastfile = origfile
 
 for model, layer in recipe:
-    a = [ script, "--model", model, "--layer", layer, "--basefile", basefile, "--iters", iters, "--octaves", octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile ]
+    a = [ script, "--model", model, "--layer", layer, "--basefile", basefile, "--iters", iters, "--octaves", octaves, "--frames", frames, "--zoom", zoom, "--rotate", rotate, "--initial", str(i), origfile ]
     print ' '.join(a)
     subprocess.call(a)
     newfile = 'Output/' + basefile + ('_f%d.jpg' % (i + f - 1))
@@ -44,4 +45,4 @@ for model, layer in recipe:
         i += f
     else:
         origfile = lastfile
-    
+

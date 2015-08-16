@@ -189,6 +189,15 @@ def objective_guide(guide_features, dst):
     dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
 
 
+def make_objective_class(target):
+    return lambda dst: objective_class(target, dst)
+
+def objective_class(target, dst):
+    one_hot = np.zeros_like(dst.data)
+    one_hot.flat[target] = 1.
+    dst.diff[:] = one_hot
+
+
 
 #def autofile(args):
 
@@ -202,10 +211,12 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--basefile", type=str, help="Base filename", default=None)
     parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
+    parser.add_argument("-t", "--target", type=int, help="ImageNet class", default=None)
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
     parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
     parser.add_argument("-v", "--verbose", action='store_true', help="Dump out a file for every iteration", default=False)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=0)
+    parser.add_argument("-r", "--rotate", type=int, help="Rotate in degrees", default=0)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
     parser.add_argument("-j", "--initial", type=int, help="Initial frame #", default=0)
     parser.add_argument("-d", "--dir", type=str, help="Directory for output jpgs", default=output_path)
@@ -259,6 +270,9 @@ if __name__ == '__main__':
         guide_layer = args.guidelayer
         obj_guide = make_objective_guide(net, guide, guide_layer)
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
+    elif args.target:
+        obj_target = make_objective_class(args.target)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_target)
     else:
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
 
@@ -266,12 +280,15 @@ if __name__ == '__main__':
 
     h, w = img.shape[:2]
     s = args.zoom
+    theta = args.rotate
     fi = args.initial
     for i in xrange(args.frames):
         img = dreamer(img)
         filename = "%s_f%d.jpg" % ( bfile, fi )
         writearray(img, filename)
         print "Wrote frame %s" % filename
+        if theta != 0:
+            img = nd.rotate(img, theta, reshape=False)
         if s != 0:
             img = nd.affine_transform(img, [1-s,1-s,1], [h*s/2,w*s/2,0], order=1)
         fi += 1
