@@ -40,6 +40,10 @@ DEFAULT_LAYERS = {
     'flickr_style': 'pool5'
 }
 
+CLASS_TARGET_LAYER = 'loss3/classifier'
+CLASS_BACKGROUND = np.float32([200.0, 200.0, 200.0])
+
+
 MEAN_BINARIES = {
     'cnn_age': 'cnn_age_gender/mean.binaryproto',
 }
@@ -106,23 +110,78 @@ def preprocess(net, img):
 def deprocess(net, img):
     return np.dstack((img + net.transformer.mean['data'])[::-1])
 
+
+# Objective functions
+
+# This is the default objective
+
 def objective_L2(dst):
     dst.diff[:] = dst.data
+
+# objective function based on a guide image
+
+def make_objective_guide(net, guide, guide_layer):
+    h, w = guide.shape[:2]
+    src, dst = net.blobs['data'], net.blobs[guide_layer]
+    src.reshape(1, 3, h, w)
+    src.data[0] = preprocess(net, guide)
+    net.forward(end=guide_layer)
+    guide_features = dst.data[0].copy()
+    return lambda d: objective_guide(guide_features, d)
+
+def objective_guide(guide_features, dst):
+    x = dst.data[0].copy()       # the data
+    y = guide_features           # the guide image
+    ch = x.shape[0]              # the shape
+    print "objective_guide"
+    print "before", x.shape, y.shape
+    x = x.reshape(ch,-1)         # reshape these
+    y = y.reshape(ch,-1)         # to match one another
+    print "after", x.shape, y.shape
+    A = x.T.dot(y)               # compute the matrix of dot-products with guide features
+    dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
+
+
+# Next idea: look at the API for loss layers (like loss3/classifier) and see what
+# can be used from them to feedback into dst.diff (ie filter them by one or more
+# target categories)
+
+
+def make_objective_target(net, foci):
+    return lambda d: objective_targets(foci, d)
+
+
+
+def objective_targets(foci, dst):
+    print "objective"
+    one_hot = np.zeros_like(dst.data)
+    for focus in foci:
+        one_hot.flat[focus] = 1.
+    dst.diff[:] = one_hot
+
 
 def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objective=objective_L2):
     '''Basic gradient ascent step.'''
 
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
-    dst = net.blobs[end]
+    dst = net.blobs[end]    # the layer targeted by default_layer
+
+    print "end = %s" % end
 
     ox, oy = np.random.randint(-jitter, jitter+1, 2)
     src.data[0] = np.roll(np.roll(src.data[0], ox, -1), oy, -2) # apply jitter shift
 
-    net.forward(end=end)
-    objective(dst)           # new parametrised objective
-    #dst.diff[:] = dst.data  # specify the optimization objective
-    net.backward(start=end)
+    print "forward"
+    net.forward(end=end)     # inference of features
+
+    objective(dst)           # set an objective
+
+    print "backward"
+    net.backward(start=end)  # retrain
+
+    print "done"
     g = src.diff[0]
+
     # apply normalized ascent step to the input image
     src.data[:] += step_size/np.abs(g).mean() * g
 
@@ -147,8 +206,9 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
             # upscale details from the previous octave
             h1, w1 = detail.shape[-2:]
             detail = nd.zoom(detail, (1, 1.0*h/h1,1.0*w/w1), order=1)
-
+        print "before reshape"
         src.reshape(1,3,h,w) # resize the network's input image size
+        print "after reshape"
         src.data[0] = octave_base+detail
         for i in xrange(iter_n):
             make_step(net, end=end, clip=clip, **step_params)
@@ -169,33 +229,6 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
     # returning the resulting image
     return deprocess(net, src.data[0])
 
-
-def make_objective_guide(net, guide, end):
-    h, w = guide.shape[:2]
-    src, dst = net.blobs['data'], net.blobs[end]
-    src.reshape(1, 3, h, w)
-    src.data[0] = preprocess(net, guide)
-    net.forward(end=end)
-    guide_features = dst.data[0].copy()
-    return lambda dst: objective_guide(guide_features, dst)
-
-def objective_guide(guide_features, dst):
-    x = dst.data[0].copy()
-    y = guide_features
-    ch = x.shape[0]
-    x = x.reshape(ch,-1)
-    y = y.reshape(ch,-1)
-    A = x.T.dot(y) # compute the matrix of dot-products with guide features
-    dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
-
-
-def make_objective_class(target):
-    return lambda dst: objective_class(target, dst)
-
-def objective_class(target, dst):
-    one_hot = np.zeros_like(dst.data)
-    one_hot.flat[target] = 1.
-    dst.diff[:] = one_hot
 
 
 
@@ -252,6 +285,12 @@ if __name__ == '__main__':
 
     net = load_net(args.model)
 
+    original_w = net.blobs['data'].width
+    original_h = net.blobs['data'].height
+
+    print "Data original size: %d %d" % ( original_w, original_h )
+
+
     if args.keys:
         print "Layers"
         for k in net.blobs.keys():
@@ -271,8 +310,9 @@ if __name__ == '__main__':
         obj_guide = make_objective_guide(net, guide, guide_layer)
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
     elif args.target:
-        obj_target = make_objective_class(args.target)
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_target)
+        layer = CLASS_TARGET_LAYER
+        obj_class = make_objective_target(net, [ args.target ])
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=1, end=layer, objective=obj_class)
     else:
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
 
@@ -288,8 +328,10 @@ if __name__ == '__main__':
         writearray(img, filename)
         print "Wrote frame %s" % filename
         if theta != 0:
+            print "rotate %d" % theta
             img = nd.rotate(img, theta, reshape=False)
         if s != 0:
+            print "zoom %f" % s
             img = nd.affine_transform(img, [1-s,1-s,1], [h*s/2,w*s/2,0], order=1)
         fi += 1
 

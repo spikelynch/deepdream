@@ -12,6 +12,9 @@ from scipy.misc import imresize
 
 import caffe
 
+import argparse
+
+
 CAFFE_MODELS = '../caffe/models/'
 
 OUTPUT_DIR = './Output/Deepdraw'
@@ -19,13 +22,20 @@ OUTPUT_DIR = './Output/Deepdraw'
 IMAGENET_CLASS = 1
 ALL_FRAMES = False
 
+
 # guacamole, consomme, ice cream, pretzel, bagel, cheeseburger, hot dog, pomegranate, pizza, chocolate sauce
 
 # CLASSLIST = [ 924, 925, 928, 931, 932, 933, 934, 957, 963, 960 ]
 
-CLASSLIST = [ 929 ]
+BASEFILE = 'Multi'
+# [ lionfish, altar ] / [ ambulance, panda ] / [ red panda, banjo ] / [ wheelbarrow, can opener ]
+CLASSLIST = [ [ 390, 402 ], [ 407, 388 ], [ 387, 417 ], [ 424, 472 ]]
+
+BASE_IMAGES = [ 'noise224.jpg' ]
+
 
 model = "bvlc_googlenet"
+#model = "googlenet_places205"
 model_path = os.path.join(CAFFE_MODELS, model)
 net_fn   = os.path.join(model_path, 'deploy_googlenet_updated.prototxt')
 param_fn = os.path.join(model_path, model + '.caffemodel')
@@ -72,17 +82,19 @@ def writearray(a, filename, fmt='jpeg'):
 
 # In[20]:
 
-def make_step(net, step_size=1.5, end='inception_4c/output', clip=True, focus=None, sigma=None):
+def make_step(net, step_size=1.5, end='inception_4c/output', clip=True, foci=None, sigma=None):
     '''Basic gradient ascent step.'''
 
-    print "make_step focus = %d end = %s" % ( focus, end )
+    # print "make_step focus = %d end = %s" % ( focus, end )
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
 
     dst = net.blobs[end]
+
     net.forward(end=end)
 
     one_hot = np.zeros_like(dst.data)
-    one_hot.flat[focus] = 1.
+    for focus in foci:
+        one_hot.flat[focus] = 1.
     dst.diff[:] = one_hot
 
     net.backward(start=end)
@@ -99,10 +111,11 @@ def make_step(net, step_size=1.5, end='inception_4c/output', clip=True, focus=No
     # reset objective for next step
     dst.diff.fill(0.)
 
-def deepdraw(net, base_img, octaves, random_crop=True, visualize=False, focus=None,
+def deepdraw(net, base_img, octaves, random_crop=True, visualize=False, foci=None,
     clip=True, **step_params):
 
-    print "Target imageclass = %d" % focus
+    print "Target imageclasses"
+    print foci
     # prepare base image
     image = preprocess(net, base_img) # (3,224,224)
 
@@ -112,13 +125,15 @@ def deepdraw(net, base_img, octaves, random_crop=True, visualize=False, focus=No
 
     print "starting drawing"
     src = net.blobs['data']
+    print "Reshaping input image size %d, %d" % ( h, w )
+
     src.reshape(1,3,h,w) # resize the network's input image size
     for e,o in enumerate(octaves):
         if 'scale' in o:
             # resize by o['scale'] if it exists
             image = nd.zoom(image, (1,o['scale'],o['scale']))
         _,imw,imh = image.shape
-
+        print "Image shape octave %d, %d" % ( imw, imh )
         # select layer
         layer = o['layer']
 
@@ -137,6 +152,7 @@ def deepdraw(net, base_img, octaves, random_crop=True, visualize=False, focus=No
                     oy = np.random.normal(mid_y, width_y*0.3, 1)
                     oy = int(np.clip(oy,0,imh-h))
                     # insert the crop into src.data[0]
+                    print "Cropping: %d, %d" % ( ox, oy )
                     src.data[0] = image[:,ox:ox+w,oy:oy+h]
                 else:
                     ox = (imw-w)/2.
@@ -150,7 +166,7 @@ def deepdraw(net, base_img, octaves, random_crop=True, visualize=False, focus=No
             sigma = o['start_sigma'] + ((o['end_sigma'] - o['start_sigma']) * i) / o['iter_n']
             step_size = o['start_step_size'] + ((o['end_step_size'] - o['start_step_size']) * i) / o['iter_n']
 
-            make_step(net, end=layer, clip=clip, focus=focus,
+            make_step(net, end=layer, clip=clip, foci=foci,
                       sigma=sigma, step_size=step_size)
 
             if visualize:
@@ -203,7 +219,7 @@ octaves = [
     },
     {
         'layer':'loss3/classifier',
-        'scale':1.2,
+        'scale': 1.2,
         'iter_n':150,
         'start_sigma':0.78*1.2,
         'end_sigma':0.78,
@@ -229,6 +245,77 @@ octaves = [
     }
 ]
 
+octaves_s = [
+    {
+        'layer':'loss3/classifier',
+        'scale': 0.7,
+        'iter_n':80,
+        'start_sigma': 0.2,
+        'end_sigma':0.5,
+        'start_step_size':11.,
+        'end_step_size':11.
+    },
+    {
+        'layer':'loss3/classifier',
+        'scale': 0.8,
+        'iter_n':60,
+        'start_sigma':0.1,
+        'end_sigma':0.1,
+        'start_step_size':6.,
+        'end_step_size':6.
+    },
+    {
+        'layer':'loss2/classifier',
+        'scale':1.2,
+        'iter_n':60,
+        'start_sigma':0.4,
+        'end_sigma':0.44,
+        'start_step_size':6.,
+        'end_step_size':3.
+    },
+    {
+        'layer':'loss1/classifier',
+        'iter_n':30,
+        'start_sigma':0.44,
+        'end_sigma':0.304,
+        'start_step_size':3.,
+        'end_step_size':3.
+    }
+]
+
+octaves2 = [
+    {
+        'layer':'loss3/classifier',
+        'iter_n':190,
+        'scale':1,
+        'start_sigma':2.5,
+        'end_sigma':0.78,
+        'start_step_size':11.,
+        'end_step_size':11.
+    },
+    {
+        'layer':'loss3/classifier',
+        'scale':1.0,
+        'iter_n':450,
+        'start_sigma':0.78*1.2,
+        'end_sigma':0.40,
+        'start_step_size':6.,
+        'end_step_size':3.
+    }
+]
+
+octaves3 = [
+    {
+        'layer':'loss3/classifier',
+        'iter_n':190,
+        'start_sigma':1,
+        'end_sigma':1,
+        'start_step_size':11.,
+        'end_step_size':11.
+    }
+]
+
+
 
 # get original input size of network
 original_w = net.blobs['data'].width
@@ -238,55 +325,18 @@ background_color = np.float32([200.0, 200.0, 200.0])
 
 print "Original image size = %d, %d" % ( original_w, original_h )
 
-for ic in CLASSLIST:
+for fn in BASE_IMAGES:
+    origfile = "Input/" + fn
+    img = np.float32(PIL.Image.open(origfile))
 
-    # generate initial random image
-    gen_image = np.random.normal(background_color, 8, (original_w, original_h, 3))
+    for ic in CLASSLIST:
 
-    # generate class visualization via octavewise gradient ascent
-    gen_image = deepdraw(net, gen_image, octaves, focus=ic,
-                         random_crop=True, visualize=ALL_FRAMES)
-    # save image
-    img_fn = '_'.join([model, "deepdraw", str(ic)+'.png'])
-    writearray(gen_image, img_fn)
+        img = np.random.normal(background_color, 8, (original_w, original_h, 3))
+        # generate class visualization via octavewise gradient ascent
+        gen_image = deepdraw(net, img, octaves2, foci=ic,
+                             random_crop=True, visualize=ALL_FRAMES)
+        # save image
+        img_fn = '_'.join([BASEFILE, str(ic), fn]) + ".png"
+        writearray(gen_image, img_fn)
     #PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
-
-
-# This choice of octave parameters tends to give more coherent images, but has a little bit less detail.
-
-# In[22]:
-
-octaves = [
-    {
-        'layer':'loss3/classifier',
-        'iter_n':190,
-        'start_sigma':2.5,
-        'end_sigma':0.78,
-        'start_step_size':11.,
-        'end_step_size':11.
-    },
-    {
-        'layer':'loss3/classifier',
-        'scale':1.2,
-        'iter_n':450,
-        'start_sigma':0.78*1.2,
-        'end_sigma':0.40,
-        'start_step_size':6.,
-        'end_step_size':3.
-    }
-]
-
-imagenet_class = 244
-
-#gen_image = np.random.normal(background_color, 8, (original_w, original_h, 3))
-#gen_image = deepdraw(net, gen_image, octaves, focus=imagenet_class,
-#                 random_crop=True, visualize=False)
-
-#img_fn = '_'.join([model_name, "deepdraw", str(imagenet_class)+'.png'])
-#PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
-
-
-# In[ ]:
-
-
 

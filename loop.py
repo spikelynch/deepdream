@@ -4,14 +4,14 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'Input/branches.jpg'
+origfile = 'Output/Dive3/goog_f780.jpg'
 script = './dream.py'
-recipe = './Layers/gnet_all_layers.txt'
+recipe = './Layers/gnet_all_layers_restart.txt'
 iters = '5'
 octaves = '3'
 frames = '20'
 basefile = 'Dive3/goog'
-startframe = 0
+startframe = 781
 zoom = '0.02'
 rotate = 5
 
@@ -36,7 +36,7 @@ f = int(frames)
 lastfile = origfile
 
 for model, layer in recipe:
-    a = [ script, "--model", model, "--layer", layer, "--basefile", basefile, "--iters", iters, "--octaves", octaves, "--frames", frames, "--zoom", zoom, "--rotate", rotate, "--initial", str(i), origfile ]
+    a = [ script, "--model", model, "--layer", layer, "--basefile", basefile, "--iters", iters, "--octaves", octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile ]
     print ' '.join(a)
     subprocess.call(a)
     newfile = 'Output/' + basefile + ('_f%d.jpg' % (i + f - 1))
