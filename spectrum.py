@@ -4,8 +4,8 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'theGap.jpg'
-model = 'places'
+origfile = 'me224.jpg'
+model = 'googlenet'
 recipe = 'places_layers.txt'
 script = './dream.py'
 path = 'PlacesSpectrum'
@@ -19,7 +19,7 @@ if not content:
     exit()
 
 tt = string.maketrans('/', '_')
-    
+
 for line in content:
     fields = line.split()
     model = fields[0]
@@ -28,4 +28,4 @@ for line in content:
     a = [ script, "--model", model, "--layer", layer, "--basefile", safelayer, origfile]
     print ' '.join(a)
     subprocess.call(a)
-    
+
