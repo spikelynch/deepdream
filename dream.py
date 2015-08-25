@@ -153,33 +153,36 @@ def make_objective_target(net, foci):
 
 
 def objective_targets(foci, dst):
-    print "objective"
     one_hot = np.zeros_like(dst.data)
     for focus in foci:
         one_hot.flat[focus] = 1.
     dst.diff[:] = one_hot
 
 
-def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objective=objective_L2):
+def blur(img, sigma):
+    if sigma > 0:
+        img[0] = nd.filters.gaussian_filter(img[0], sigma, order=0)
+        img[1] = nd.filters.gaussian_filter(img[1], sigma, order=0)
+        img[2] = nd.filters.gaussian_filter(img[2], sigma, order=0)
+    return img
+
+
+
+def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objective=objective_L2, sigma=0):
     '''Basic gradient ascent step.'''
 
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
     dst = net.blobs[end]    # the layer targeted by default_layer
 
-    print "end = %s" % end
-
     ox, oy = np.random.randint(-jitter, jitter+1, 2)
     src.data[0] = np.roll(np.roll(src.data[0], ox, -1), oy, -2) # apply jitter shift
 
-    print "forward"
     net.forward(end=end)     # inference of features
 
     objective(dst)           # set an objective
 
-    print "backward"
     net.backward(start=end)  # retrain
 
-    print "done"
     g = src.diff[0]
 
     # apply normalized ascent step to the input image
@@ -190,6 +193,11 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
     if clip:
         bias = net.transformer.mean['data']
         src.data[:] = np.clip(src.data, -bias, 255-bias)
+
+    if sigma:
+        src.data[0] = blur(src.data[0], sigma)
+
+
 
 
 def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_scale=1.4, end=default_layer, clip=True, **step_params):
@@ -206,19 +214,16 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
             # upscale details from the previous octave
             h1, w1 = detail.shape[-2:]
             detail = nd.zoom(detail, (1, 1.0*h/h1,1.0*w/w1), order=1)
-        print "before reshape"
         src.reshape(1,3,h,w) # resize the network's input image size
-        print "after reshape"
-        src.data[0] = octave_base+detail
+        src.data[0] = octave_base + detail
+
         for i in xrange(iter_n):
             make_step(net, end=end, clip=clip, **step_params)
-
-            # visualization
             vis = deprocess(net, src.data[0])
             if not clip: # adjust image contrast if clipping is disabled
                 vis = vis*(255.0/np.percentile(vis, 99.98))
-            #showarray(vis)
-            print octave, i, end #, vis.shape
+
+            print octave, i, end
             if verbose_file:
                 filename = "%s_%d_%i.jpg" % ( verbose_file, octave, i )
                 writearray(vis, filename)
@@ -231,8 +236,131 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
 
 
 
+# TODO:
+
+# parametrise the octaves so that they're unlinked from the above function
+
+# figure out a way to scale up the input to loss3/classifier and/or use
+# the other classifiers so that --target works on larger images.
+
+# basic tiles for now
+
+def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, clip=True, **step_params):
+
+    # prepare base image
+
+    image = preprocess(net, base_img)
+
+    _, imw, imh = image.shape
+
+
+    # get input dimensions from net
+    w = net.blobs['data'].width
+    h = net.blobs['data'].height
+
+    src = net.blobs['data']
+    print "Reshaping input image size %d, %d" % ( h, w )
+
+    src.reshape(1,3,h,w) # resize the network's input image size
+
+    tiles = make_tile_pattern(image, w, h)
+
+    for i in xrange(iter_n):
+        print "Iter %d" % i
+        for x, y in tiles:
+            tile = get_tile(image, x, y, w, h)
+            if len(tile):
+                src.data[0] = tile
+                make_step(net, end=end, clip=clip, **step_params)
+                put_tile(image, src.data[0], x, y, w, h)
+    return deprocess(net, image)
+
+# spiral outwards, overlapping
+
+def make_tile_pattern(image, w, h):
+    _, imgw, imgh = image.shape
+
+    ox = (imgw - w) / 2
+    oy = (imgh - h) / 2
+
+    spiral = [  ]
+
+    r = 1
+    done = False
+
+    while not done:
+        sq = make_ring(imgw, imgh, w, h, r)
+        if sq:
+            spiral += sq
+            r += 1
+        else:
+            done = True
+    return spiral
+
+
+def make_ring(imgw, imgh, w, h, r):
+    sq = []
+    ox = (imgw - r * w) / 2
+    oy = (imgh - r * h) / 2
+    for x in range(r):
+        x1 = ox + x * w
+        y1 = oy
+        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
+    for y in range(1, r):
+        x1 = ox + (r - 1) * w
+        y1 = oy + y * h
+        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
+    for x in range(r - 2, -1, -1):
+        x1 = ox + x * w
+        y1 = oy + (r - 1) * h
+        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
+    for y in range(r - 2, 0, -1):
+        x1 = ox
+        y1 = oy + y * h
+        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
+    if len(sq):
+        print "Ring %d: %s" % ( r, sq )
+    return sq
+
+
+def add_if_intersect(sq, imgw, imgh, x, y, w, h):
+    if x < imgw and x > -w and y < imgh and y > -h:
+        sq.append((x, y))
+
+
+
+def get_tile(image, x, y, w, h):
+    if x < 0 or y < 0:
+        return []
+    _, imgw, imgh = image.shape
+    x2 = x + w
+    y2 = y + h
+    if x2 > imgw - 1 or y2 > imgh - 1:
+        return []
+    return image[:,x:x2,y:y2]
+
+
+def put_tile(image, data, x, y, w, h):
+    if x < 0 or y < 0:
+        return None
+    _, imgw, imgh = image.shape
+    x2 = x + w
+    y2 = y + h
+    if x2 > imgw - 1 or y2 > imgh - 1:
+        return None
+    image[:,x:x2,y:y2] = data
 
 #def autofile(args):
+
+
+def parse_classes(s):
+    try:
+        il = map(int, s.split(','))
+        return il
+    except ValueError(e):
+        print "Bad class"
+        return []
+
 
 
 
@@ -244,9 +372,10 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--basefile", type=str, help="Base filename", default=None)
     parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
-    parser.add_argument("-t", "--target", type=int, help="ImageNet class", default=None)
+    parser.add_argument("-t", "--target", type=str, help="ImageNet class(es) (comma separated)", default=None)
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
     parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
+    parser.add_argument("-s", "--sigma", type=float, help="Blur (sigma)", default=0)
     parser.add_argument("-v", "--verbose", action='store_true', help="Dump out a file for every iteration", default=False)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=0)
     parser.add_argument("-r", "--rotate", type=int, help="Rotate in degrees", default=0)
@@ -310,9 +439,14 @@ if __name__ == '__main__':
         obj_guide = make_objective_guide(net, guide, guide_layer)
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
     elif args.target:
+        foci = parse_classes(args.target)
+        if not foci:
+            print "Bad targets"
+            sys.exit(-1)
         layer = CLASS_TARGET_LAYER
-        obj_class = make_objective_target(net, [ args.target ])
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=1, end=layer, objective=obj_class)
+        obj_class = make_objective_target(net, foci)
+        sigma = args.sigma
+        dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=sigma)
     else:
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
 

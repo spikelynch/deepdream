@@ -29,9 +29,9 @@ ALL_FRAMES = False
 
 BASEFILE = 'Multi'
 # [ lionfish, altar ] / [ ambulance, panda ] / [ red panda, banjo ] / [ wheelbarrow, can opener ]
-CLASSLIST = [ [ 390, 402 ], [ 407, 388 ], [ 387, 417 ], [ 424, 472 ]]
+CLASSLIST = [ [ 2 ]]
 
-BASE_IMAGES = [ 'noise224.jpg' ]
+BASE_IMAGES = [ 'Denison.jpg', 'theGap.jpg' ]
 
 
 model = "bvlc_googlenet"
