@@ -348,46 +348,43 @@ def get_tile(image, x, y, w, h):
     x2 = x + w
     y2 = y + h
     t = []
-
-    if x2 > imgw:
-        if y2 > imgh or y < 0:
-            return []
-        else:
-            print "x, y = %d, %d; x2, y2 = %d, %d " % ( x, y, x2, y2)
-            clipped = image[:, x:imgw, y:y2]
-            padding = np.full((3, x2 - imgw, h), CLASS_BACKGROUND)
-            print clipped.shape, padding.shape
-            t = np.concatenate((clipped, padding), 1)
-            print "x ->"
-            print t.shape
-    elif y2 > imgh:
-        if x < 0:
-            return []
-        print "x, y = %d, %d; x2, y2 = %d, %d " % ( x, y, x2, y2)
-        clipped = image[:, x:x2, y:imgh]
-        padding = np.full((3, w, y2 - imgh), CLASS_BACKGROUND)
-        t = np.concatenate((clipped, padding), 2)
-        print "y ->"
-        print t.shape
-    elif x < 0:
+    #print "x, y = %d, %d; x2, y2 = %d, %d " % ( x, y, x2, y2)
+    #print "w = %d h = %d" % ( w, h )
+    #print "imgw = %d imgh = %d" % ( imgw, imgh )
+    if x < 0:
         if y < 0:
             return []
+        elif y2 > imgh:
+            return []
         else:
-            print "x, y = %d, %d; x2, y2 = %d, %d " % ( x, y, x2, y2)
             clipped = image[:, 0:x2, y:y2]
             padding = np.full((3, -x, h), CLASS_BACKGROUND)
+            #print clipped.shape, padding.shape
             t = np.concatenate((padding, clipped), 1)
-            print "<- x"
-            print t.shape
-    elif y < 0:
-        print "x, y = %d, %d; x2, y2 = %d, %d " % ( x, y, x2, y2)
-        clipped = image[:, x:x2, 0:y2]
-        padding = np.full((3, w, -y), 0.)
-        t = np.concatenate((padding, clipped), 2)
-        print "<- y"
-        print t.shape
+            #print "<- x", t.shape
+    elif x2 > imgw:
+        if y < 0:
+            return []
+        elif y2 > imgh:
+            return []
+        else:
+            clipped = image[:, x:imgw, y:y2]
+            padding = np.full((3, x2 - imgw, h), CLASS_BACKGROUND)
+            t = np.concatenate((clipped, padding), 1)
+            #print "x ->", t.shape
     else:
-        t = image[:, x:x2, y:y2]
+        if y < 0:
+            clipped = image[:, x:x2, 0:y2]
+            padding = np.full((3, w, -y), CLASS_BACKGROUND)
+            t = np.concatenate((padding, clipped), 2)
+            #print "<- y", t.shape
+        elif y2 > imgh:
+            clipped = image[:, x:x2, y:imgh]
+            padding = np.full((3, w, y2 - imgh), CLASS_BACKGROUND)
+            t = np.concatenate((clipped, padding), 2)
+            #print "y ->", t.shape
+        else:
+            t = image[:, x:x2, y:y2]
     return t
 
 
