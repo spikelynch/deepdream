@@ -281,8 +281,6 @@ def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, cli
         print "Iter %d" % i
         for x, y in tiles:
             tile = get_tile(image, x, y, w, h)
-            print "SHAPE"
-#            print tile.shape
             if len(tile):
                 src.data[0] = tile
                 make_step(net, end=end, clip=clip, **step_params)
@@ -392,31 +390,37 @@ def put_tile(image, data, x, y, w, h):
     _, imgw, imgh = image.shape
     x2 = x + w
     y2 = y + h
-    if x2 > imgw:
-        if y2 > imgh:
-            return False
-        else:
-            xx = imgw - x
-            print x, y, x, x2, xx
-            image[:,x:imgw,y:y2] = data[:,:xx,:]
-            return True
-    elif y2 > imgh:
-        yy = imgh - y
-        image[:,x:x2,y:imgh] = data[:,:,:yy]
-        return True
     if x < 0:
         if y < 0:
+            return False
+        elif y2 > imgh:
             return False
         else:
             xx = 0 - x
             image[:,0:x2,y:y2] = data[:,xx:w,:]
             return True
-    elif y < 0:
-        yy = 0 - y
-        image[:,x:x2,0:y2] = data[:,:,yy:h]
-        return True
-    print "PUT", x, y, x2, y2, data.shape
-    image[:,x:x2,y:y2] = data
+    elif x2 > imgw:
+        if y < 0:
+            return False
+        elif y2 > imgh:
+            return False
+        else:
+            xx = imgw - x
+            image[:,x:imgw,y:y2] = data[:,:xx,:]
+            return True
+    else:
+        if y < 0:
+            yy = 0 - y
+            image[:,x:x2,0:y2] = data[:,:,yy:h]
+            return True
+        elif y2 > imgh:
+            yy = imgh - y
+            image[:,x:x2,y:imgh] = data[:,:,:yy]
+            return True
+        else:
+            image[:,x:x2,y:y2] = data
+            return True
+
 
 #def autofile(args):
 
