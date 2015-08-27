@@ -346,83 +346,77 @@ def get_tile(image, x, y, w, h):
     x2 = x + w
     y2 = y + h
     t = []
-    #print "x, y = %d, %d; x2, y2 = %d, %d " % ( x, y, x2, y2)
-    #print "w = %d h = %d" % ( w, h )
-    #print "imgw = %d imgh = %d" % ( imgw, imgh )
+    px = 0
+    py = 0
     if x < 0:
-        if y < 0:
-            return []
-        elif y2 > imgh:
-            return []
-        else:
-            clipped = image[:, 0:x2, y:y2]
-            padding = np.full((3, -x, h), CLASS_BACKGROUND)
-            #print clipped.shape, padding.shape
-            t = np.concatenate((padding, clipped), 1)
-            #print "<- x", t.shape
+        print "x < 0 : %d" % x
+        px = x
+        x = 0
     elif x2 > imgw:
-        if y < 0:
-            return []
-        elif y2 > imgh:
-            return []
-        else:
-            clipped = image[:, x:imgw, y:y2]
-            padding = np.full((3, x2 - imgw, h), CLASS_BACKGROUND)
-            t = np.concatenate((clipped, padding), 1)
-            #print "x ->", t.shape
-    else:
-        if y < 0:
-            clipped = image[:, x:x2, 0:y2]
-            padding = np.full((3, w, -y), CLASS_BACKGROUND)
-            t = np.concatenate((padding, clipped), 2)
-            #print "<- y", t.shape
-        elif y2 > imgh:
-            clipped = image[:, x:x2, y:imgh]
-            padding = np.full((3, w, y2 - imgh), CLASS_BACKGROUND)
-            t = np.concatenate((clipped, padding), 2)
-            #print "y ->", t.shape
-        else:
-            t = image[:, x:x2, y:y2]
-    return t
+        print "x2 > %d : %d" % ( imgw, x )
+        px = x2 - imgw
+        x2 = imgw
+    if y < 0:
+        print "y < 0 : %d" % y
+        py = y
+        y = 0
+    elif y2 > imgh:
+        print "y2 > %d : %d" % ( imgh, y )
+        py = y2 - imgh
+        y2 = imgh
+
+    tile = image[:, x:x2, y:y2]
+    if px < 0:
+        print "%d <- x" % px
+        padding = np.full((3, -px, y2 - y), CLASS_BACKGROUND)
+        tile = np.concatenate((padding, tile), 1)
+        print tile.shape
+    elif px > 0:
+        print "x -> %d" % px
+        padding = np.full((3, px, y2 - y), CLASS_BACKGROUND)
+        tile = np.concatenate((tile, padding), 1)
+        print tile.shape
+    if py < 0:
+        print "%d <- y" % py
+        padding = np.full((3, w, -py), CLASS_BACKGROUND)
+        tile = np.concatenate((padding, tile), 2)
+        print tile.shape
+    elif py > 0:
+        print "y -> %d" % py
+        padding = np.full((3, w, py), CLASS_BACKGROUND)
+        tile = np.concatenate((tile, padding), 2)
+        print tile.shape
+    print "%d, %d, %d, %d" % ( x, y, x2, y2 )
+    return tile
+
 
 
 def put_tile(image, data, x, y, w, h):
     _, imgw, imgh = image.shape
+    # x1/y1/x2/y2: in image
+    # u1/v1/u2/v2: in data
+    x1 = x
+    y1 = y
     x2 = x + w
     y2 = y + h
+    u1 = 0
+    v1 = 0
+    u2 = w
+    v2 = h
     if x < 0:
-        if y < 0:
-            return False
-        elif y2 > imgh:
-            return False
-        else:
-            xx = 0 - x
-            image[:,0:x2,y:y2] = data[:,xx:w,:]
-            return True
+        u1 = -x
+        x1 = 0
     elif x2 > imgw:
-        if y < 0:
-            return False
-        elif y2 > imgh:
-            return False
-        else:
-            xx = imgw - x
-            image[:,x:imgw,y:y2] = data[:,:xx,:]
-            return True
-    else:
-        if y < 0:
-            yy = 0 - y
-            image[:,x:x2,0:y2] = data[:,:,yy:h]
-            return True
-        elif y2 > imgh:
-            yy = imgh - y
-            image[:,x:x2,y:imgh] = data[:,:,:yy]
-            return True
-        else:
-            image[:,x:x2,y:y2] = data
-            return True
+        u2 = w - (x2 - imgw)   #fix
+        x2 = imgw
+    if y < 0:
+        v1 = -y
+        y1 = 0
+    elif y2 > imgh:
+        v2 = h - (y2 - imgh)    #fix
+        y2 = imgh
+    image[:,x1:x2,y1:y2] = data[:,u1:u2,v1:v2]
 
-
-#def autofile(args):
 
 
 def parse_classes(s):
