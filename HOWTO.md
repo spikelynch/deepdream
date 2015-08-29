@@ -8,7 +8,7 @@ notebook to process images using the
 [Caffe](http://caffe.berkeleyvision.org/) neural network framework,
 based on a model provided on the Google github, making strange things happen:
 
-![Transformation](https://raw.githubusercontent.com/spikelynch/deepdream/master/Cassowary.jpg)
+![Transformation](https://raw.githubusercontent.com/spikelynch/deepdream/master/Fractal_rails.jpg)
 
 
 This how-to covers the following:
