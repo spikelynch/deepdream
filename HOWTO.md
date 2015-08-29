@@ -8,7 +8,7 @@ notebook to process images using the
 [Caffe](http://caffe.berkeleyvision.org/) neural network framework,
 based on a model provided on the Google github, making strange things happen:
 
-![Transformation](https://raw.githubusercontent.com/spikelynch/deepdream/master/Rosetta_trans.jpg)
+![Transformation](https://raw.githubusercontent.com/spikelynch/deepdream/master/Cassowary.jpg)
 
 
 This how-to covers the following:
@@ -195,7 +195,7 @@ Near the top of the file should be a couple of lines like:
     # CPU-only switch (uncomment to build without GPU support).
     # CPU_ONLY := 1
 
-You need to remove the '#' at the start of the second line, so that it looks like: 
+You need to remove the '#' at the start of the second line, so that it looks like:
 
     # CPU-only switch (uncomment to build without GPU support).
     CPU_ONLY := 1
@@ -251,7 +251,7 @@ results to a series of image files.  Here it is:
 For this to work, you should download the script to the ~/Dreamer
 directory on your Ubuntu environment, and create a directory called 'Output'.
 
-The simplest way to get a source image is to find something on the web and download it to ~/Dreamer: 
+The simplest way to get a source image is to find something on the web and download it to ~/Dreamer:
 
     cd ~/Dreamer
     mkdir Output

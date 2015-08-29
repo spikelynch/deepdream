@@ -4,7 +4,7 @@ dream.py usage notes
     dream.py [options] input_image.jpg
 
 
-    Flags
+### Options
 
     -m --model MODELNAME
 
