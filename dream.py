@@ -41,7 +41,7 @@ DEFAULT_LAYERS = {
 }
 
 CLASS_TARGET_LAYER = 'loss3/classifier'
-CLASS_BACKGROUND = 0.0
+CLASS_BACKGROUND = 128.
 
 
 MEAN_BINARIES = {
@@ -281,6 +281,8 @@ def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, cli
         print "Iter %d" % i
         for x, y in tiles:
             tile = get_tile(image, x, y, w, h)
+#             td = deprocess(net, tile)
+#             writearray(td, "tile_%d_%d_%d.jpg" % ( i, x, y))
             if len(tile):
                 src.data[0] = tile
                 make_step(net, end=end, clip=clip, **step_params)
@@ -349,45 +351,48 @@ def get_tile(image, x, y, w, h):
     px = 0
     py = 0
     if x < 0:
-        print "x < 0 : %d" % x
         px = x
         x = 0
     elif x2 > imgw:
-        print "x2 > %d : %d" % ( imgw, x )
         px = x2 - imgw
         x2 = imgw
     if y < 0:
-        print "y < 0 : %d" % y
         py = y
         y = 0
     elif y2 > imgh:
-        print "y2 > %d : %d" % ( imgh, y )
         py = y2 - imgh
         y2 = imgh
 
     tile = image[:, x:x2, y:y2]
     if px < 0:
-        print "%d <- x" % px
-        padding = np.full((3, -px, y2 - y), CLASS_BACKGROUND)
-        tile = np.concatenate((padding, tile), 1)
-        print tile.shape
+        p = padding(-px, y2 - y, tile)
+        # np.full((3, -px, y2 - y), CLASS_BACKGROUND)
+        tile = np.concatenate((p, tile), 1)
     elif px > 0:
-        print "x -> %d" % px
-        padding = np.full((3, px, y2 - y), CLASS_BACKGROUND)
-        tile = np.concatenate((tile, padding), 1)
-        print tile.shape
+        p = padding(px, y2 - y, tile)
+        #padding = np.full((3, px, y2 - y), CLASS_BACKGROUND)
+        tile = np.concatenate((tile, p), 1)
     if py < 0:
-        print "%d <- y" % py
-        padding = np.full((3, w, -py), CLASS_BACKGROUND)
-        tile = np.concatenate((padding, tile), 2)
-        print tile.shape
+        #padding = np.full((3, w, -py), CLASS_BACKGROUND)
+        p = padding(w, -py, tile)
+        tile = np.concatenate((p, tile), 2)
     elif py > 0:
-        print "y -> %d" % py
-        padding = np.full((3, w, py), CLASS_BACKGROUND)
-        tile = np.concatenate((tile, padding), 2)
-        print tile.shape
-    print "%d, %d, %d, %d" % ( x, y, x2, y2 )
+        #padding = np.full((3, w, py), CLASS_BACKGROUND)
+        p = padding(w, py, tile)
+        tile = np.concatenate((tile, p), 2)
     return tile
+
+
+
+def padding(w, h, tile):
+    """Generate padding with the average colour of tile"""
+#     padding = np.full((3, w, h), CLASS_BACKGROUND)
+#     return padding
+    r = np.full((w, h), np.mean(tile[0]))
+    g = np.full((w, h), np.mean(tile[1]))
+    b = np.full((w, h), np.mean(tile[2]))
+    p = np.array([ r, g, b ])
+    return p
 
 
 
@@ -423,7 +428,7 @@ def parse_classes(s):
     try:
         il = map(int, s.split(','))
         return il
-    except ValueError(e):
+    except ValueError():
         print "Bad class"
         return []
 

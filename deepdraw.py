@@ -27,17 +27,17 @@ ALL_FRAMES = False
 
 # CLASSLIST = [ 924, 925, 928, 931, 932, 933, 934, 957, 963, 960 ]
 
-BASEFILE = 'Multi'
+BASEFILE = 'PLtest'
 # [ lionfish, altar ] / [ ambulance, panda ] / [ red panda, banjo ] / [ wheelbarrow, can opener ]
-CLASSLIST = [ [ 2 ]]
+CLASSLIST = [ [ x ] for x in range(0,205)]
 
-BASE_IMAGES = [ 'Denison.jpg', 'theGap.jpg' ]
+BASE_IMAGES = [ 'noise224.jpg' ]
 
 
-model = "bvlc_googlenet"
-#model = "googlenet_places205"
+#model = "bvlc_googlenet"
+model = "googlenet_places205"
 model_path = os.path.join(CAFFE_MODELS, model)
-net_fn   = os.path.join(model_path, 'deploy_googlenet_updated.prototxt')
+net_fn   = os.path.join(model_path, 'deploy.prototxt')
 param_fn = os.path.join(model_path, model + '.caffemodel')
 
 
