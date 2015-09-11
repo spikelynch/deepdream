@@ -203,33 +203,30 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
 def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_scale=1.4, tiling=False, end=default_layer, clip=True, **step_params):
     # prepare base images for all octaves
     octaves = [preprocess(net, base_img)]
+
     for i in xrange(octave_n-1):
         octaves.append(nd.zoom(octaves[-1], (1, 1.0/octave_scale,1.0/octave_scale), order=1))
 
+    w0 = net.blobs['data'].width
+    h0 = net.blobs['data'].height
+
     src = net.blobs['data']
+    for o in octaves:
+        print o.shape
     detail = np.zeros_like(octaves[-1]) # allocate image for network-produced details
+    if tiling:
+        image = np.zeros_like(base_img)
     for octave, octave_base in enumerate(octaves[::-1]):
         h, w = octave_base.shape[-2:]
         if octave > 0:
             # upscale details from the previous octave
             h1, w1 = detail.shape[-2:]
             detail = nd.zoom(detail, (1, 1.0*h/h1,1.0*w/w1), order=1)
-        src.reshape(1,3,h,w) # resize the network's input image size
-        src.data[0] = octave_base + detail
 
-        if tiling:
-            tiles = make_tile_pattern(detail, w, h)
-            for i in xrange(iter_n):
-                print "Iter %d" % i
-                for x, y in tiles:
-                    tile = get_tile(detail, x, y, w, h)
-                    print tile
-                    if len(tile):
-                        src.data[0] = tile
-                        make_step(net, end=end, clip=clip, **step_params)
-                        put_tile(detail, src.data[0], x, y, w, h)
-            detail = src.data[0] - octave_base
-        else:
+
+        if not tiling:
+            src.reshape(1, 3, h, w) # resize the network's input image size
+            src.data[0] = octave_base + detail
             for i in xrange(iter_n):
                 make_step(net, end=end, clip=clip, **step_params)
                 vis = deprocess(net, src.data[0])
@@ -241,10 +238,32 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
                     writearray(vis, filename)
                     print "Wrote %s" % filename
 
-        # extract details produced on the current octave
-        detail = src.data[0] - octave_base
+            # extract details produced on the current octave
+            detail = src.data[0] - octave_base
+            writearray(deprocess(net, detail), "detail_%d.jpg" % octave)
+        else:
+#            image.reshape(1, 3, h, w)
+            image = octave_base + detail
+            print "tiling, image = %d %d" % ( h, w )
+            tiles = make_tile_pattern(image, w0, h0)
+            for i in xrange(iter_n):
+                 print "Iter %d" % i
+                 for x, y in tiles:
+                    tile = get_tile(image, x, y, w0, h0)
+                    print "tile = ", tile.shape
+                    if len(tile):
+                        src.data[0] = tile
+                        make_step(net, end=end, clip=clip, **step_params)
+                        print src.data[0].shape
+                        put_tile(image, src.data[0], x, y, w0, h0)
+            detail = image - octave_base
+            writearray(deprocess(net, detail), "detail_%d.jpg" % octave)
+
     # returning the resulting image
-    return deprocess(net, src.data[0])
+    if not tiling:
+        return deprocess(net, src.data[0])
+    else:
+        return deprocess(net, image)
 
 
 
@@ -281,8 +300,6 @@ def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, cli
         print "Iter %d" % i
         for x, y in tiles:
             tile = get_tile(image, x, y, w, h)
-#             td = deprocess(net, tile)
-#             writearray(td, "tile_%d_%d_%d.jpg" % ( i, x, y))
             if len(tile):
                 src.data[0] = tile
                 make_step(net, end=end, clip=clip, **step_params)
@@ -293,6 +310,9 @@ def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, cli
 
 def make_tile_pattern(image, w, h):
     _, imgw, imgh = image.shape
+
+    if imgw == w and imgh == h:
+        return [ ( 0, 0 ) ]
 
     ox = (imgw - w) / 2
     oy = (imgh - h) / 2
@@ -345,6 +365,7 @@ def add_if_intersect(sq, imgw, imgh, x, y, w, h):
 
 def get_tile(image, x, y, w, h):
     _, imgw, imgh = image.shape
+    #print "get tile at %d, %d (%d, %d) from %d, %d" % ( x, y, w, h, imgw, imgh )
     x2 = x + w
     y2 = y + h
     t = []
@@ -362,22 +383,17 @@ def get_tile(image, x, y, w, h):
     elif y2 > imgh:
         py = y2 - imgh
         y2 = imgh
-
     tile = image[:, x:x2, y:y2]
     if px < 0:
         p = padding(-px, y2 - y, tile)
-        # np.full((3, -px, y2 - y), CLASS_BACKGROUND)
         tile = np.concatenate((p, tile), 1)
     elif px > 0:
         p = padding(px, y2 - y, tile)
-        #padding = np.full((3, px, y2 - y), CLASS_BACKGROUND)
         tile = np.concatenate((tile, p), 1)
     if py < 0:
-        #padding = np.full((3, w, -py), CLASS_BACKGROUND)
         p = padding(w, -py, tile)
         tile = np.concatenate((p, tile), 2)
     elif py > 0:
-        #padding = np.full((3, w, py), CLASS_BACKGROUND)
         p = padding(w, py, tile)
         tile = np.concatenate((tile, p), 2)
     return tile
@@ -509,7 +525,7 @@ if __name__ == '__main__':
         guide_layer = args.guidelayer
         obj_guide = make_objective_guide(net, guide, guide_layer)
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
-    elif args.target:
+    elif args.target is not None:
         foci = parse_classes(args.target)
         if not foci:
             print "Bad targets"
@@ -518,13 +534,15 @@ if __name__ == '__main__':
         obj_class = make_objective_target(net, foci)
         sigma = args.sigma
         dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=sigma)
-        #dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, tiling=True, end=layer, objective=obj_class, sigma=sigma)
+        #dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, tiling=True, end=layer, objective=obj_class, sigma=sigma)
     else:
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
 
     # default value of args.frames is 1
 
     h, w = img.shape[:2]
+
+    print "Shape" , img.shape
     s = args.zoom
     theta = args.rotate
     fi = args.initial

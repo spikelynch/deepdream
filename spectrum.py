@@ -4,11 +4,12 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'me224.jpg'
+phases = [ 0, 120 ]
+origfiles = './Layers/gray_%d.jpg'
 model = 'googlenet'
-recipe = 'places_layers.txt'
+recipe = 'Layers/places_layers.txt'
 script = './dream.py'
-path = 'PlacesSpectrum'
+path = './Layers/Googlenet/'
 
 content = None
 
@@ -18,14 +19,17 @@ with open(recipe) as f:
 if not content:
     exit()
 
-tt = string.maketrans('/', '_')
-
 for line in content:
     fields = line.split()
-    model = fields[0]
+    #model = fields[0]
     layer = fields[1]
-    safelayer = os.path.join(path, layer.translate(tt))
-    a = [ script, "--model", model, "--layer", layer, "--basefile", safelayer, origfile]
-    print ' '.join(a)
-    subprocess.call(a)
-
+    layerpath = os.path.join(path, layer)
+    if not os.path.exists(layerpath):
+        os.makedirs(layerpath)
+    print layer
+    for i in phases:
+        ofile = origfiles % i
+        bfile = os.path.join(layer, "frame%d") % i
+        a = [ script, "--dir", path, "--model", model, "--layer", layer, "--iters", "40", "--basefile", bfile, ofile]
+        print ' '.join(a)
+        subprocess.call(a)
