@@ -7,21 +7,27 @@ working="$dir/working"
 layer=$1
 lastframe=""
 firstframe=""
-iters="35"
+iters="10"
 blend="15"
 lblend="10"
 
 mkdir -p "${dir}/${layer}"
 
-convert -size 640x480 xc: +noise Random ${working}/random.png
+convert -size 320x320 xc: +noise Random ${working}/random.png
 
 lasti="345"
 
 for i in `seq 0 15 359`; do
+    convert ${working}/random.png  -channel R  -function Sinusoid 1,${i} \
+            -virtual-pixel tile -blur 0x16 -auto-level \
+            -separate ${working}/red_${i}.jpg
     convert ${working}/random.png  -channel G  -function Sinusoid 1,${i} \
             -virtual-pixel tile -blur 0x16 -auto-level \
-            -separate ${working}/gray_${i}.jpg
-    convert ${working}/gray_${i}.jpg -colorspace rgb -type truecolor ${working}/base_${i}.jpg
+            -separate ${working}/green_${i}.jpg
+    convert ${working}/random.png  -channel B  -function Sinusoid 1,${i} \
+            -virtual-pixel tile -blur 0x16 -auto-level \
+            -separate ${working}/blue_${i}.jpg
+    convert ${working}/red_${i}.jpg ${working}/green_${i}.jpg ${working}/blue_${i}.jpg -combine ${working}/base_${i}.jpg
     # blend the last frame, if it exists
     if [ -n "$lastframe" ]; then
         composite -blend ${blend} ${lastframe} ${working}/base_${i}.jpg ${working}/blended_${i}.jpg
