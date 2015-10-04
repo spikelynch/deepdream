@@ -1,16 +1,28 @@
 TODO
 ====
 
-* default behaviour should be - clean up all working images
+Immediate things to fix:
 
-* option to leave working images (in a directory)
+* fix the messy filenames (no _f0 etc unless multiple frames, default
+  to write out 0,1,2,3,4
 
-* encode parameters and store them somehow
-
-* option to automatically compile frames into a movie
-
-* fix the messy filenames
+* fix octaves with deepdraw
 
 * library-ise the deepdream code so I can stop using shell scripts
 
-* fix octaves with deepdraw
+
+--------------
+
+* default behaviour should be - clean up all working images <-DONE
+
+* option to leave working images (in a directory)
+
+* encode parameters and store them somehow !!!!
+
+* option to automatically compile frames into a movie (ffmpeg to gif
+
+
+
+
+* use the Python bindings for ImageMagick to produce the input
+  patterns and output GIFs

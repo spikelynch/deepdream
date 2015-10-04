@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # imports and basic notebook setup
 from cStringIO import StringIO
 import numpy as np
@@ -26,6 +25,7 @@ MODELS = {
     'caffenet': 'bvlc_reference_caffenet',
     'ilsvrc13': 'bvlc_reference_rcnn_ilsvrc13',
     'flickr_style': 'finetune_flickr_style'
+#    'cars' : 'cars'
 }
 
 DEFAULT_LAYERS = {
@@ -40,7 +40,18 @@ DEFAULT_LAYERS = {
     'flickr_style': 'pool5'
 }
 
-CLASS_TARGET_LAYER = 'loss3/classifier'
+CLASS_TARGET_LAYER = {
+    'googlenet': 'loss3/classifier',
+    'places': 'loss3/classifier',
+    'oxford': 'fc8_oxford_102',
+    'flickr_style': 'fc8_flickr',
+    'cars': 'fc8',
+    'cnn_age': 'fc8',
+    'cnn_gender': 'fc8',
+    'ilsvrc13': 'fc-rcnn',
+    'caffenet': 'fc8'
+}
+
 CLASS_BACKGROUND = 128.
 
 
@@ -530,7 +541,10 @@ if __name__ == '__main__':
         if not foci:
             print "Bad targets"
             sys.exit(-1)
-        layer = CLASS_TARGET_LAYER
+        if args.model not in CLASS_TARGET_LAYER:
+            print "Can't do deepdraw on this model yet"
+            sys.exit(-1)
+        layer = CLASS_TARGET_LAYER[args.model]
         obj_class = make_objective_target(net, foci)
         sigma = args.sigma
         dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=sigma)
@@ -548,7 +562,10 @@ if __name__ == '__main__':
     fi = args.initial
     for i in xrange(args.frames):
         img = dreamer(img)
-        filename = "%s_f%d.jpg" % ( bfile, fi )
+        if args.frames > 1:
+            filename = "%s_f%d.jpg" % ( bfile, fi )
+        else:
+            filename = "%s.jpg" % bfile
         writearray(img, filename)
         print "Wrote frame %s" % filename
         if theta != 0:

@@ -1,48 +1,53 @@
 #!/usr/bin/env python
 
 import sys, os, os.path
+from shutil import copy
 import subprocess
 import string
 
-origfile = 'Output/Dive3/goog_f780.jpg'
+origfile = 'Input/blank_places.jpg'
+tempfile = 'Output/tempfile.jpg'
+glide="-5 -background grey"
 script = './dream.py'
-recipe = './Layers/gnet_all_layers_restart.txt'
-iters = '5'
+model = 'googlenet'
+recipe_file = './Layers/places_layers.txt'
+iters = '2'
 octaves = '3'
-frames = '20'
-basefile = 'Dive3/goog'
-startframe = 781
-zoom = '0.02'
-rotate = 5
+frames = '60'
+basefile = 'Loop3/google'
+startframe = 0
+zoom = '0.00'
+rotate = '2'
 
-with open(recipe) as f:
-    content = [ x.strip('\n') for x in f.readlines() ]
+recipe = None
 
-if not content:
+with open(recipe_file) as f:
+    recipe = [ x.strip('\n') for x in f.readlines() ]
+
+if not recipe:
     sys.exit()
 
-recipe = []
-
-for line in content:
-    fields = line.split()
-    if len(fields) == 2:
-        recipe.append((fields[0], fields[1]))
+print recipe
 
 
-tt = string.maketrans('/', '_')
 
 i = startframe
 f = int(frames)
 lastfile = origfile
 
-for model, layer in recipe:
+for layer in recipe:
     a = [ script, "--model", model, "--layer", layer, "--basefile", basefile, "--iters", iters, "--octaves", octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile ]
     print ' '.join(a)
     subprocess.call(a)
     newfile = 'Output/' + basefile + ('_f%d.jpg' % (i + f - 1))
+    g = [ 'convert', newfile, '-page', glide, '-flatten', tempfile ]
+    subprocess.call(g)
+    print "shift %s -> %d" % ( newfile, tempfile )
+    copy(tempfile, newfile)
     if os.path.isfile(newfile):
         origfile = newfile
         i += f
     else:
         origfile = lastfile
+    origfile = tempfile
 
