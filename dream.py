@@ -213,13 +213,18 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
 
 def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_scale=1.4, tiling=False, end=default_layer, clip=True, **step_params):
     # prepare base images for all octaves
-    octaves = [preprocess(net, base_img)]
 
-    for i in xrange(octave_n-1):
-        octaves.append(nd.zoom(octaves[-1], (1, 1.0/octave_scale,1.0/octave_scale), order=1))
+    octaves = [preprocess(net, base_img)]
 
     w0 = net.blobs['data'].width
     h0 = net.blobs['data'].height
+
+    for i in xrange(octave_n-1):
+        o_base = nd.zoom(octaves[-1], (1, 1.0/octave_scale,1.0/octave_scale), order=1)
+        h, w = o_base.shape[-2:]
+        if h > h0 and w > w0:
+            octaves.append(o_base)
+
 
     src = net.blobs['data']
     for o in octaves:
@@ -547,8 +552,8 @@ if __name__ == '__main__':
         layer = CLASS_TARGET_LAYER[args.model]
         obj_class = make_objective_target(net, foci)
         sigma = args.sigma
-        dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=sigma)
-        #dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, tiling=True, end=layer, objective=obj_class, sigma=sigma)
+        #dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=sigma)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, tiling=True, end=layer, objective=obj_class, sigma=sigma)
     else:
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
 
