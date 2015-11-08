@@ -8,6 +8,7 @@ from IPython.display import clear_output, Image, display
 from google.protobuf import text_format
 
 import argparse
+import json
 import re
 import sys
 import os
@@ -52,8 +53,17 @@ CLASS_TARGET_LAYER = {
     'caffenet': 'fc8'
 }
 
-CLASS_BACKGROUND = 128.
+N_CLASSES = {
+    'googlenet': 1000,
+    'caffenet': 1000,
+    'places': 205
+}
 
+MAGIC_TARGETS = [ 'randomise' ]
+        
+CLASS_BACKGROUND = 128.0
+
+MD_FILE = 'dream.json'
 
 MEAN_BINARIES = {
     'cnn_age': 'cnn_age_gender/mean.binaryproto',
@@ -165,11 +175,22 @@ def make_objective_target(net, foci):
 
 def objective_targets(foci, dst):
     one_hot = np.zeros_like(dst.data)
-    for focus in foci:
-        one_hot.flat[focus] = 1.
+    for focus, weight in foci.iteritems():
+        one_hot.flat[focus] = 1. * weight
     dst.diff[:] = one_hot
 
 
+def make_magic_targets(type, model):
+    n = N_CLASSES[model]
+    foci = {}
+    for i in range(0, n):
+        if np.random.randint(0, 2):
+            foci[i] = 1.
+        else:
+            foci[i] = -1.
+    return foci
+        
+    
 def blur(img, sigma):
     if sigma > 0:
         img[0] = nd.filters.gaussian_filter(img[0], sigma, order=0)
@@ -222,9 +243,8 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
     for i in xrange(octave_n-1):
         o_base = nd.zoom(octaves[-1], (1, 1.0/octave_scale,1.0/octave_scale), order=1)
         h, w = o_base.shape[-2:]
-        if h > h0 and w > w0:
+        if not tiling or (h > h0 and w > w0):
             octaves.append(o_base)
-
 
     src = net.blobs['data']
     for o in octaves:
@@ -266,7 +286,7 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
                  print "Iter %d" % i
                  for x, y in tiles:
                     tile = get_tile(image, x, y, w0, h0)
-                    print "tile = ", tile.shape
+                    # print "tile = ", tile.shape
                     if len(tile):
                         src.data[0] = tile
                         make_step(net, end=end, clip=clip, **step_params)
@@ -456,53 +476,109 @@ def put_tile(image, data, x, y, w, h):
 
 
 
-def parse_classes(s):
+def parse_classes(s, w):
+    if s == 'nil':
+        return {}
     try:
         il = map(int, s.split(','))
-        return il
+        weight = 1.
+        if w:
+            weight = w
+        c = { f: weight for f in il }
+        return c
     except ValueError():
         print "Bad class"
-        return []
+        return {}
 
 
+def write_json(bfile, args):
+    jsonfile = bfile + '.json'
+    with open(jsonfile, 'wb') as jf:
+        jf.write(json.dumps(args, sort_keys=True, indent=4))
 
+# TODO: add the octaves to the json output and input
+# default octaves stored in a config file somewhere (actually all
+# defaults)?
+
+def read_json(jfile):
+    a = argparse.Namespace()
+    with open(jfile, 'rb') as jf:
+        data = json.load(jf)
+        for arg, value in data.iteritems():
+            a.__setattr__(arg, value)
+    return a
+
+
+def convert_focus(strfoci):
+    foci = {}
+    for target, weight in strfoci.iteritems():
+        ti = int(target)
+        foci[ti] = weight
+    return foci
+
+        
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("s",        type=str, help="The source image")
+    parser.add_argument("input",        type=str, help="The source image")
+    parser.add_argument("output",        type=str, help="The output directory")
+    parser.add_argument("-c", "--config",  type=str, default=None, help="JSON config file")
     parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='googlenet')
     parser.add_argument("-l", "--layer", type=str, help="The layer")
     parser.add_argument("-b", "--basefile", type=str, help="Base filename", default=None)
     parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
     parser.add_argument("-t", "--target", type=str, help="ImageNet class(es) (comma separated)", default=None)
+    parser.add_argument("-w", "--weight", type=float, help="Weight of ImageNet classes", default=None)
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
     parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
     parser.add_argument("-s", "--sigma", type=float, help="Blur (sigma)", default=0)
+    parser.add_argument("-u", "--glide", type=str, help="Glide between frames x,y", default=None)
     parser.add_argument("-v", "--verbose", action='store_true', help="Dump out a file for every iteration", default=False)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=0)
     parser.add_argument("-r", "--rotate", type=int, help="Rotate in degrees", default=0)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
     parser.add_argument("-j", "--initial", type=int, help="Initial frame #", default=0)
-    parser.add_argument("-d", "--dir", type=str, help="Directory for output jpgs", default=output_path)
     parser.add_argument("-k", "--keys", action='store_true', help="Dump a list of available layers", default=False)
     args = parser.parse_args()
+     
+    origfile = args.input
+    output_path = args.output
 
-    origfile = args.s
+    if os.path.exists(output_path):
+        if os.path.isdir(output_path):
+            print "Warning: %s already exists" % output_path
+        else:
+            print "Output path %s is a file: exiting" % output_path
+            sys.exit(-1)
+    else:
+        os.makedirs(output_path)
 
+    if args.config:
+        if not os.path.isfile(args.config):
+            print "Config file %s not found" % args.config
+            sys.exit(-1)
+        args = read_json(args.config)
+            
     if args.basefile:
-        bfile = os.path.join(args.dir, args.basefile)
+        bfile = os.path.join(output_path, args.basefile)
     else:
         f, e = os.path.splitext(os.path.basename(origfile))
         if e != '.jpg':
             print "Input must be a jpg"
             print "Got %s/%s" % ( f, e )
             sys.exit(-1)
-        bfile = os.path.join(args.dir, f)
+        bfile = os.path.join(output_path, f)
 
+    if args.target:
+        if args.target in MAGIC_TARGETS and not args.config:
+            print "make magic targets"
+            foci = make_magic_targets(args.target, args.model)
+            args.target = foci
+        
+    # TODO: if bfile exists, add something to its name 
 
-
-    # format: "$BASEIMG_fZ.jpg" or "$BASEIMG_O_I.jpg" for verbose
+    write_json(bfile, vars(args))
 
     vfile = None
     if args.verbose:
@@ -542,24 +618,34 @@ if __name__ == '__main__':
         obj_guide = make_objective_guide(net, guide, guide_layer)
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
     elif args.target is not None:
-        foci = parse_classes(args.target)
-        if not foci:
-            print "Bad targets"
-            sys.exit(-1)
         if args.model not in CLASS_TARGET_LAYER:
-            print "Can't do deepdraw on this model yet"
+            print "Can't do deepdraw on this model"
             sys.exit(-1)
+        if type(args.target) is dict:
+            foci = convert_focus(args.target)
+        else:
+            foci = parse_classes(args.target, args.weight)
+        if not foci:
+            print "Empty targets"
+            foci = []
+        print foci
         layer = CLASS_TARGET_LAYER[args.model]
         obj_class = make_objective_target(net, foci)
-        sigma = args.sigma
-        #dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=sigma)
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, tiling=True, end=layer, objective=obj_class, sigma=sigma)
+        dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=args.sigma)
+        #dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, tiling=True, end=layer, objective=obj_class, sigma=args.sigma)
     else:
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer)
+        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, sigma=args.sigma, end=layer)
 
     # default value of args.frames is 1
 
     h, w = img.shape[:2]
+
+    gx, gy = 0, 0
+    if args.glide:
+        g0 = args.glide.split(',')
+        if len(g0) == 2:
+            gx = int(g0[0])
+            gy = int(g0[1])
 
     print "Shape" , img.shape
     s = args.zoom
@@ -579,6 +665,9 @@ if __name__ == '__main__':
         if s != 0:
             print "zoom %f" % s
             img = nd.affine_transform(img, [1-s,1-s,1], [h*s/2,w*s/2,0], order=1)
+        if gx != 0 or gy != 0:
+            print "glide %d ,%d" % ( gx, gy )
+            img = nd.shift(img, [ gy, gx, 0], mode='nearest')
         fi += 1
 
 
