@@ -4,12 +4,15 @@ TODO
 Immediate things to fix:
 
 * fix the messy filenames (no _f0 etc unless multiple frames, default
-  to write out 0,1,2,3,4
+  to write out 0,1,2,3,4)
 
-* fix octaves with deepdraw
+* fix octaves with deepdraw <- fixed
+
+* improved output:
+  - create a new directory with metadata file containing all frames,
+  with an option to switch this off
 
 * library-ise the deepdream code so I can stop using shell scripts
-
 
 --------------
 

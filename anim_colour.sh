@@ -9,16 +9,16 @@ working="$dir/working"
 
 lastframe=""
 firstframe=""
-iters="10"
+iters="20"
 blend="15"
 lblend="10"
-amp=".1"
+amp=".2"
 mean=".7"
 
 mkdir -p "${dir}/${target}"
 mkdir -p "${dir}/working"
 
-convert -size 320x320 xc: +noise Random ${working}/random.png
+convert -size 227x227 xc: +noise Random ${working}/random.png
 
 echo "Animation frames output to ${dir}/${target}"
 
@@ -50,7 +50,7 @@ for i in `seq 0 15 359`; do
         cp ${working}/base_${i}.jpg ${working}/blended_${i}.jpg
     fi
        
-    ./dream.py --dir "${dir}/${target}" --model $model --iters $iters --layer $layer --basefile frame_${i} ${working}/blended_${i}.jpg
+    ./dream.py --dir "${dir}/${target}" --model $model --iters $iters --layer $target --sigma .25 --basefile frame_${i} ${working}/blended_${i}.jpg
     lastframe="${dir}/${target}/frame_${i}.jpg"
     echo "lastframe = $lastframe"
     if [ -n "${firstframe}" ]; then

@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
 
-model=googlenet
-dir="./Animations/Googlenet"
-working="$dir/working"
-layer=$1
+model=caffenet
+target="randomise"
+dir="./Animations/CaffeNetDD/Random"
+working="./Animations/CaffenetDD/working"
 lastframe=""
 firstframe=""
-iters="35"
-blend="15"
+iters="200"
+blend="5"
 lblend="10"
 
-mkdir -p "${dir}/${layer}"
+#mkdir -p "${dir}/${layer}"
 
-convert -size 640x480 xc: +noise Random ${working}/random.png
+convert -size 227x227 xc: +noise Random ${working}/random.png
 
-lasti="345"
+lasti="350"
 
-for i in `seq 0 15 359`; do
+for i in `seq 0 10 359`; do
     convert ${working}/random.png  -channel G  -function Sinusoid 1,${i} \
             -virtual-pixel tile -blur 0x16 -auto-level \
             -separate ${working}/gray_${i}.jpg
@@ -32,12 +32,15 @@ for i in `seq 0 15 359`; do
         cp ${working}/base_${i}.jpg ${working}/blended_${i}.jpg
     fi
        
-    ./dream.py --dir "${dir}/${layer}" --model $model --iters $iters --layer $layer --basefile frame_${i}.jpg ${working}/blended_${i}.jpg
-    lastframe="${dir}/${layer}/frame_${i}.jpg_f0.jpg"
+    ./dream.py --model $model --iters $iters --target $target --weight -1 --basefile frame_${i} ${working}/blended_${i}.jpg ${dir}
+    lastframe="${dir}/frame_${i}.jpg"
     if [ -n "${firstframe}" ]; then
         firstframe="${lastframe}"
     fi
 done
+
+./rename.py $dir
+./gifenc.sh ${dir}/frame_%d.jpg ${dir}/anim.gif
 
 #rm ${dir}/gray4_*.jpg
 #rm ${dir}/base4_*.jpg

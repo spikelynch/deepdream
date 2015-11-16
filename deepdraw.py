@@ -11,13 +11,13 @@ import sys
 from scipy.misc import imresize
 
 import caffe
-
+import os.path
 import argparse
 
 
 CAFFE_MODELS = '../caffe/models/'
 
-OUTPUT_DIR = './Output/Deepdraw'
+OUTPUT_DIR = './Output/Deepdraw/Places'
 
 IMAGENET_CLASS = 1
 ALL_FRAMES = False
@@ -27,14 +27,13 @@ ALL_FRAMES = False
 
 # CLASSLIST = [ 924, 925, 928, 931, 932, 933, 934, 957, 963, 960 ]
 
-BASEFILE = 'PLtest'
 # [ lionfish, altar ] / [ ambulance, panda ] / [ red panda, banjo ] / [ wheelbarrow, can opener ]
-CLASSLIST = [ [ x ] for x in range(0,205)]
+CLASSLIST = [ [ 0 ] ]
 
-BASE_IMAGES = [ 'noise224.jpg' ]
+BASE_IMAGES = [ 'base_0.jpg' ]
 
 
-#model = "bvlc_googlenet"
+#model = ""
 model = "googlenet_places205"
 model_path = os.path.join(CAFFE_MODELS, model)
 net_fn   = os.path.join(model_path, 'deploy.prototxt')
@@ -316,6 +315,19 @@ octaves3 = [
 ]
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("input",  type=str, help="The source image")
+parser.add_argument("output", type=str, help="The output directory")
+parser.add_argument("-m", "--model", type=str, help="The model")
+parser.add_argument("-t", "--target", type=str, help="The target")
+
+args = parser.parse_args()
+
+ifile = args.input
+outfile = args.output
+targets = args.target
+classes = [ int(s) for s in targets.split(',') ]
+
 
 # get original input size of network
 original_w = net.blobs['data'].width
@@ -325,18 +337,14 @@ background_color = np.float32([200.0, 200.0, 200.0])
 
 print "Original image size = %d, %d" % ( original_w, original_h )
 
-for fn in BASE_IMAGES:
-    origfile = "Input/" + fn
-    img = np.float32(PIL.Image.open(origfile))
+origfile = "Input/" + ifile
+img = np.float32(PIL.Image.open(origfile))
 
-    for ic in CLASSLIST:
+#img = np.random.normal(background_color, 8, (original_w, original_h, 3))
+# generate class visualization via octavewise gradient ascent
+gen_image = deepdraw(net, img, octaves2, foci=classes,
+                    random_crop=True, visualize=ALL_FRAMES)# save image
+writearray(gen_image, outfile)
 
-        img = np.random.normal(background_color, 8, (original_w, original_h, 3))
-        # generate class visualization via octavewise gradient ascent
-        gen_image = deepdraw(net, img, octaves2, foci=ic,
-                             random_crop=True, visualize=ALL_FRAMES)
-        # save image
-        img_fn = '_'.join([BASEFILE, str(ic), fn]) + ".png"
-        writearray(gen_image, img_fn)
-    #PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
+   #PIL.Image.fromarray(np.uint8(gen_image)).save('./' + img_fn)
 

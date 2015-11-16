@@ -480,7 +480,16 @@ def parse_classes(s, w):
     if s == 'nil':
         return {}
     try:
-        il = map(int, s.split(','))
+        il = []
+        for c1 in s.split(','):
+            c2 = c1.split('-')
+            print len(c2)
+            if len(c2) == 1:
+                il.append(int(c2[0]))
+            else:
+                il += (range(int(c2[0]), int(c2[1]) + 1))
+#        il = map(int, s.split(','))
+        print il
         weight = 1.
         if w:
             weight = w
@@ -554,12 +563,7 @@ if __name__ == '__main__':
     else:
         os.makedirs(output_path)
 
-    if args.config:
-        if not os.path.isfile(args.config):
-            print "Config file %s not found" % args.config
-            sys.exit(-1)
-        args = read_json(args.config)
-            
+    # basefile is never taken from config
     if args.basefile:
         bfile = os.path.join(output_path, args.basefile)
     else:
@@ -569,6 +573,15 @@ if __name__ == '__main__':
             print "Got %s/%s" % ( f, e )
             sys.exit(-1)
         bfile = os.path.join(output_path, f)
+
+        
+    if args.config:
+        if not os.path.isfile(args.config):
+            print "Config file %s not found" % args.config
+            sys.exit(-1)
+        args = read_json(args.config)
+
+            
 
     if args.target:
         if args.target in MAGIC_TARGETS and not args.config:

@@ -1,29 +1,32 @@
 #!/usr/bin/env bash
 
-# All Oxford flowers on random colours
+# All MIT Places on random colours
 
-amp=".25"
+amp=".5"
 mean=".5"
+iters="200"
+sigma="0.33"
+blur="0x18"
 
-for class in {12..999}
+for class in {11..204}
 do
-    # convert -size 227x227 xc: +noise Random Input/noise.png
-    # convert Input/noise.png  -channel R  -function Sinusoid 1,0 \
-    #         -virtual-pixel tile -blur 0x16 -auto-level \
-    #         -separate Input/red.jpg
-    # convert Input/noise.png  -channel G  -function Sinusoid 1,0 \
-    #         -virtual-pixel tile -blur 0x16 -auto-level \
-    #         -separate Input/green.jpg
-    # convert Input/noise.png  -channel B  -function Sinusoid 1,0 \
-    #         -virtual-pixel tile -blur 0x16 -auto-level \
-    #         -separate Input/blue.jpg
-    # convert Input/red.jpg -function Sinusoid 1,0,${amp},${mean} Input/red2.jpg
-    # convert Input/blue.jpg -function Sinusoid 1,0,${amp},${mean} Input/blue2.jpg
-    # convert Input/green.jpg -function Sinusoid 1,0,${amp},${mean} Input/green2.jpg
+    convert -size 224x224 xc: +noise Random Input/noise.png
+    convert Input/noise.png  -channel R  -function Sinusoid 1,0,${amp},${mean} \
+            -virtual-pixel tile -blur $blur -auto-level  \
+            -separate Input/red.jpg
+    convert Input/noise.png  -channel G  -function Sinusoid 1,0,${amp},${mean} \
+            -virtual-pixel tile -blur $blur -auto-level \
+            -separate Input/green.jpg
+    convert Input/noise.png  -channel B  -function Sinusoid 1,0,${amp},${mean} \
+            -virtual-pixel tile -blur $blur -auto-level \
+            -separate Input/blue.jpg
+    #convert Input/red.jpg -function Sinusoid .5,0,${amp},${mean} Input/red2.jpg
+    #convert Input/blue.jpg -function Sinusoid .5,0,${amp},${mean} Input/blue2.jpg
+    #convert Input/green.jpg -function Sinusoid .5,0,${amp},${mean} Input/green2.jpg
 
-    # convert Input/red2.jpg Input/green2.jpg Input/blue2.jpg -combine Input/base_${class}.jpg
+    convert Input/red.jpg Input/green.jpg Input/blue.jpg -combine Input/base_${class}.jpg
 
-    ./dream.py --model googlenet --iters 100 --target $class --sigma 0.35 --basefile Deepdraw/GoogleNet/class_$class  ./Input/me224.jpg
+    ./dream.py --model places --target $class --iters $iters --sigma $sigma --basefile places2_${class} Input/base_${class}.jpg Places2
    
 done
-b
+
