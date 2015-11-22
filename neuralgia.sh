@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+# neuralgia.sh $OUTDIR $BASEFILE $CONFIG $SIZE $SCALE $BLEND
 
 working="./Neuralgia/working"
-scale=1
-blend=60
-size=224
-config=$1
+outdir=$1
 output=$2
+config=$3
+size=$4
+scale=$5
+blend=$6
 
 convert -size ${size}x${size} xc: +noise Random ${working}/random.png
 
@@ -34,4 +36,4 @@ composite -blend ${blend} ${working}/fade.jpg ${working}/base1.jpg ${working}/ba
 
 #convert ${working}/graybase.jpg -colorspace rgb -type truecolor ${working}/base.jpg
 
-./dream.py --config $config --basefile ${output} ${working}/base.jpg ./Neuralgia/
+./dream.py --config $config --basefile ${output} ${working}/base.jpg ${outdir}
