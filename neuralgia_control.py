@@ -9,22 +9,31 @@ import neuralgia
 
 OUTDIR = './Neuralgia'
 
+#"Good_sequence"
 NSTART = 8
+
 NTWEEN = 100
 NSAMPLE = 8
 SIZE = "224"
 SCALE = "8"
 BLEND = "75"
 
+# NSTART = 12
+# NTWEEN = 60
+# NSAMPLE = 12
+# SIZE = "224"
+# SCALE = "8"
+# BLEND = "90"
+
 outfile = os.path.join(OUTDIR, "neuralgia2b.txt")
 
 start_targets = random.sample(range(0, 1000), NSTART)
 
-conffile = os.path.join(OUTDIR, 'conf0.json')
+#conffile = os.path.join(OUTDIR, 'conf0.json')
 
-neuralgia.write_config(start_targets, conffile)
+#neuralgia.write_config(start_targets, conffile)
 
-subprocess.call(["./neuralgia.sh", OUTDIR, 'image0', conffile, SIZE, SCALE, BLEND])
+#subprocess.call(["./neuralgia.sh", OUTDIR, 'image0', conffile, SIZE, SCALE, BLEND])
 
 lastimage = "./Neuralgia/image0.jpg"
 
