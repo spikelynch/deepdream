@@ -1,0 +1,201 @@
+./Neuralgia/Chapter3/image199.jpg: green mamba, bighorn, cash machine, wok, rugby ball, cassette player, pier, hornbill
+./Neuralgia/image0.jpg: king crab, jaguar, coral reef, leopard, wombat, common newt, bullfrog, box turtle
+./Neuralgia/image1.jpg: sidewinder, mink, isopod, fiddler crab, scuba diver, axolotl, Dungeness crab, barracouta
+./Neuralgia/image2.jpg: American alligator, wool, dugong, yellow lady's slipper, anemone fish, tailed frog, trilobite, flatworm
+./Neuralgia/image3.jpg: water snake, badger, axolotl, doormat, scorpion, common newt, handkerchief, brain coral
+./Neuralgia/image4.jpg: common newt, rock python, frilled lizard, hare, ocarina, eel, night snake, sea cucumber
+./Neuralgia/image5.jpg: carousel, yellow lady's slipper, hippopotamus, slug, book jacket, whiptail, fiddler crab, cicada
+./Neuralgia/image6.jpg: bullfrog, African crocodile, brambling, loggerhead, potter's wheel, hippopotamus, armadillo, Yorkshire terrier
+./Neuralgia/image7.jpg: Komodo dragon, redbone, African chameleon, stingray, bloodhound, mongoose, goldfish, hartebeest
+./Neuralgia/image8.jpg: Saluki, platypus, American lobster, beagle, alp, Doberman, mongoose, tiger cat
+./Neuralgia/image9.jpg: night snake, common newt, rock crab, African crocodile, Chesapeake Bay retriever, spotted salamander, grey fox, coyote
+./Neuralgia/image10.jpg: rock python, tench, brambling, kit fox, green lizard, platypus, hammerhead, gazelle
+./Neuralgia/image11.jpg: fox squirrel, loggerhead, quilt, alligator lizard, leatherback turtle, isopod, sidewinder, agama
+./Neuralgia/image12.jpg: stingray, eft, box turtle, axolotl, common iguana, common newt, African crocodile, centipede
+./Neuralgia/image13.jpg: coral reef, puffer, grey fox, common iguana, black stork, spiny lobster, carousel, platypus
+./Neuralgia/image14.jpg: jellyfish, Airedale, sea anemone, axolotl, quail, chambered nautilus, American alligator, lionfish
+./Neuralgia/image15.jpg: coho, leatherback turtle, barn spider, Yorkshire terrier, sidewinder, coyote, crayfish, stingray
+./Neuralgia/image16.jpg: axolotl, lion, bloodhound, hippopotamus, otterhound, isopod, grey fox, velvet
+./Neuralgia/image17.jpg: tub, scorpion, German shepherd, slug, hippopotamus, spindle, wool, hermit crab
+./Neuralgia/image18.jpg: Irish setter, armadillo, snail, prairie chicken, chiton, miniature pinscher, flatworm, sea anemone
+./Neuralgia/image19.jpg: sea urchin, Scotch terrier, sleeping bag, chambered nautilus, briard, night snake, ringlet, doormat
+./Neuralgia/image20.jpg: platypus, sidewinder, eel, goldfish, safety pin, flatworm, Band Aid, rock python
+./Neuralgia/image21.jpg: tench, crayfish, chiton, chambered nautilus, bolete, nematode, night snake, agama
+./Neuralgia/image22.jpg: eel, fiddler crab, flatworm, gong, prayer rug, meat loaf, sea urchin, sturgeon
+./Neuralgia/image23.jpg: chiton, horned viper, black grouse, sea anemone, prayer rug, stole, American alligator, thunder snake
+./Neuralgia/image24.jpg: sea urchin, mud turtle, Dungeness crab, velvet, lionfish, barracouta, bullfrog, volcano
+./Neuralgia/image25.jpg: valley, knot, buckeye, crayfish, sea anemone, chiton, cairn, American alligator
+./Neuralgia/image26.jpg: rock beauty, beaver, wire-haired fox terrier, African crocodile, night snake, isopod, briard, Irish terrier
+./Neuralgia/image27.jpg: partridge, quail, terrapin, marmoset, house finch, snail, briard, goldfish
+./Neuralgia/image28.jpg: spiny lobster, bolete, grey fox, goldfish, Rottweiler, frilled lizard, Dungeness crab, rock beauty
+./Neuralgia/image29.jpg: electric ray, hermit crab, sea cucumber, goldfish, red wolf, vizsla, diamondback, Dutch oven
+./Neuralgia/image30.jpg: conch, coral reef, tiger shark, scorpion, mongoose, axolotl, common iguana, hen
+./Neuralgia/image31.jpg: rock crab, cheetah, poncho, grey fox, hognose snake, king snake, pinwheel, Gila monster
+./Neuralgia/image32.jpg: hognose snake, king snake, bullfrog, Airedale, American alligator, horned viper, leopard, night snake
+./Neuralgia/image33.jpg: sea snake, common newt, nematode, stinkhorn, leatherback turtle, handkerchief, eel, common iguana
+./Neuralgia/image34.jpg: isopod, tench, green lizard, tub, night snake, chain, fiddler crab, sea cucumber
+./Neuralgia/image35.jpg: armadillo, badger, wild boar, silky terrier, electric ray, broom, jigsaw puzzle, stole
+./Neuralgia/image36.jpg: sidewinder, crayfish, American lobster, sleeping bag, goldfish, Irish water spaniel, bassinet, banded gecko
+./Neuralgia/image37.jpg: sea slug, brain coral, shower curtain, electric ray, goldfish, wire-haired fox terrier, volcano, night snake
+./Neuralgia/image38.jpg: chambered nautilus, mud turtle, goldfish, scorpion, crayfish, snorkel, porcupine, sea cucumber
+./Neuralgia/image39.jpg: snail, electric ray, stingray, trilobite, chiton, rock python, terrapin, spiny lobster
+./Neuralgia/image40.jpg: Airedale, green mamba, diamondback, carbonara, coil, Indian elephant, quilt, African chameleon
+./Neuralgia/image41.jpg: starfish, thunder snake, chiton, shower curtain, king crab, Gila monster, eel, quilt
+./Neuralgia/image42.jpg: chiton, nematode, diamondback, whiptail, red fox, snail, sturgeon, ruffed grouse
+./Neuralgia/image43.jpg: sea snake, coral reef, grey fox, hippopotamus, lionfish, leatherback turtle, trilobite, platypus
+./Neuralgia/image44.jpg: Airedale, isopod, hammerhead, coho, leatherback turtle, electric ray, nematode, triceratops
+./Neuralgia/image45.jpg: prairie chicken, marmoset, isopod, stingray, rock crab, Australian terrier, brain coral, hen
+./Neuralgia/image46.jpg: sea snake, hen, Egyptian cat, leopard, puffer, American lobster, hartebeest, rock beauty
+./Neuralgia/image47.jpg: crayfish, loggerhead, wool, dugong, tiger shark, frilled lizard, tench, goldfish
+./Neuralgia/image48.jpg: electric ray, terrapin, loggerhead, bittern, prairie chicken, water snake, hartebeest, macaw
+./Neuralgia/image49.jpg: stingray, diamondback, hen, hermit crab, lionfish, crayfish, sidewinder, Gordon setter
+./Neuralgia/image50.jpg: axolotl, spiny lobster, hognose snake, house finch, maze, tailed frog, snorkel, partridge
+./Neuralgia/image51.jpg: nematode, sombrero, nipple, whiptail, strawberry, hair slide, Dungeness crab, starfish
+./Neuralgia/image52.jpg: isopod, tailed frog, dishrag, bolo tie, pajama, nipple, oxygen mask, rock python
+./Neuralgia/image53.jpg: velvet, rule, banded gecko, bath towel, water snake, rock beauty, fountain, common newt
+./Neuralgia/image54.jpg: velvet, fox squirrel, wig, alligator lizard, nipple, rock crab, shower cap, sidewinder
+./Neuralgia/image55.jpg: centipede, tray, banded gecko, puffer, water snake, Indian cobra, tick, chambered nautilus
+./Neuralgia/image56.jpg: porcupine, electric ray, prairie chicken, velvet, platypus, hognose snake, slug, Irish setter
+./Neuralgia/image57.jpg: boa constrictor, starfish, doormat, hyena, water snake, tailed frog, cheetah, chiton
+./Neuralgia/image58.jpg: crayfish, terrapin, polecat, scorpion, hermit crab, hen-of-the-woods, vine snake, frilled lizard
+./Neuralgia/image59.jpg: Yorkshire terrier, goldfish, rock beauty, sea anemone, banded gecko, armadillo, barn spider, leatherback turtle
+./Neuralgia/image60.jpg: pinwheel, ringlet, kit fox, gar, red fox, box turtle, banded gecko, window screen
+./Neuralgia/image61.jpg: puffer, hare, barracouta, coral reef, redbone, starfish, water buffalo, miniature pinscher
+./Neuralgia/image62.jpg: barracouta, common newt, snorkel, dhole, cardoon, pinwheel, brambling, coyote
+./Neuralgia/image63.jpg: rock beauty, axolotl, mongoose, Komodo dragon, Indian elephant, bubble, leopard, common newt
+./Neuralgia/image64.jpg: dugong, rock crab, coral reef, eel, sea snake, mud turtle, Irish water spaniel, grey fox
+./Neuralgia/image65.jpg: swimming trunks, maillot, diamondback, snail, rock beauty, isopod, bathing cap, neck brace
+./Neuralgia/image66.jpg: barracouta, king crab, porcupine, axolotl, sombrero, coral reef, mountain tent, tiger shark
+./Neuralgia/image67.jpg: hare, nipple, hog, gong, Yorkshire terrier, otter, shower curtain, echidna
+./Neuralgia/image68.jpg: wild boar, Egyptian cat, hen, marmoset, bullfrog, meerkat, sea anemone, tiger cat
+./Neuralgia/image69.jpg: baboon, African crocodile, banded gecko, Sussex spaniel, armadillo, water snake, marmoset, diamondback
+./Neuralgia/image70.jpg: thunder snake, knot, grey fox, sea snake, slug, alligator lizard, maze, otter
+./Neuralgia/image71.jpg: thunder snake, snail, knot, spotted salamander, skunk, Gila monster, Indian cobra, common newt
+./Neuralgia/image72.jpg: Dungeness crab, fox squirrel, starfish, padlock, electric ray, European fire salamander, coral reef, tile roof
+./Neuralgia/image73.jpg: snail, spiny lobster, whiptail, jellyfish, isopod, custard apple, brain coral, night snake
+./Neuralgia/image74.jpg: lionfish, Yorkshire terrier, hermit crab, puffer, sea anemone, spotted salamander, king crab, scuba diver
+./Neuralgia/image75.jpg: snorkel, tick, Airedale, hognose snake, scuba diver, Yorkshire terrier, sea urchin, eel
+./Neuralgia/image76.jpg: hamster, porcupine, sea cucumber, nematode, sea lion, feather boa, jigsaw puzzle, water snake
+./Neuralgia/image77.jpg: puffer, flatworm, dishrag, coral reef, barracouta, coho, centipede, sea urchin
+./Neuralgia/image78.jpg: whiptail, quill, flatworm, volcano, lionfish, crayfish, eel, banded gecko
+./Neuralgia/image79.jpg: hammerhead, Dungeness crab, flatworm, poncho, panpipe, trilobite, anemone fish, feather boa
+./Neuralgia/image80.jpg: crayfish, cock, starfish, velvet, peacock, shower cap, Indian cobra, electric ray
+./Neuralgia/image81.jpg: flatworm, whiptail, maze, rock python, jellyfish, alligator lizard, European fire salamander, green mamba
+./Neuralgia/image82.jpg: fiddler crab, wool, chambered nautilus, Dungeness crab, eft, African crocodile, tench, sea cucumber
+./Neuralgia/image83.jpg: red wolf, barn spider, slug, prairie chicken, king crab, sea snake, water snake, great white shark
+./Neuralgia/image84.jpg: sea slug, common newt, poncho, earthstar, sidewinder, centipede, coho, conch
+./Neuralgia/image85.jpg: sea anemone, ant, loggerhead, spindle, hermit crab, flatworm, barracouta, tiger shark
+./Neuralgia/image86.jpg: wood rabbit, platypus, sea urchin, Indian cobra, beaver, centipede, ruffed grouse, common newt
+./Neuralgia/image87.jpg: maze, ringneck snake, tailed frog, loggerhead, eel, armadillo, prairie chicken, brain coral
+./Neuralgia/image88.jpg: Indian cobra, gar, box turtle, eel, sundial, barracouta, shower cap, night snake
+./Neuralgia/image89.jpg: mink, stingray, miniature pinscher, sea snake, titi, American chameleon, whiptail, European fire salamander
+./Neuralgia/image90.jpg: redbone, alligator lizard, slug, mosquito net, sea anemone, agama, common newt, nematode
+./Neuralgia/image91.jpg: African chameleon, banded gecko, consomme, mongoose, gar, rock beauty, armadillo, eel
+./Neuralgia/image92.jpg: lesser panda, triceratops, whiptail, tench, Shetland sheepdog, axolotl, spiny lobster, barracouta
+./Neuralgia/image93.jpg: African crocodile, axolotl, banded gecko, macaw, eel, fox squirrel, rock crab, hare
+./Neuralgia/image94.jpg: starfish, tailed frog, bubble, chiton, Dungeness crab, dugong, American alligator, rock crab
+./Neuralgia/image95.jpg: hermit crab, bikini, plate, bathing cap, sea anemone, scuba diver, starfish, gar
+./Neuralgia/image96.jpg: leopard, triceratops, jellyfish, stole, Gordon setter, Airedale, hen, volcano
+./Neuralgia/image97.jpg: plastic bag, cicada, sea cucumber, sea snake, coho, sleeping bag, banded gecko, wreck
+./Neuralgia/image98.jpg: whiptail, snail, rock crab, goldfish, chambered nautilus, eft, quilt, stingray
+./Neuralgia/image99.jpg: porcupine, starfish, slug, armadillo, monarch, centipede, confectionery, shower curtain
+./Neuralgia/image100.jpg: thunder snake, barracouta, quill, chiton, weasel, African crocodile, volcano, lionfish
+./Neuralgia/image101.jpg: African chameleon, lakeside, poncho, wool, fiddler crab, thunder snake, electric ray, horned viper
+./Neuralgia/image102.jpg: stingray, wool, goldfish, chiton, rock python, diamondback, jigsaw puzzle, ringneck snake
+./Neuralgia/image103.jpg: coral reef, hammerhead, miniature pinscher, slug, barracouta, horned viper, banded gecko, weasel
+./Neuralgia/image104.jpg: wood rabbit, loggerhead, eel, conch, African chameleon, mud turtle, hog, eft
+./Neuralgia/image105.jpg: sea cucumber, Pomeranian, horned viper, jigsaw puzzle, sea urchin, shower cap, pinwheel, redbone
+./Neuralgia/image106.jpg: shower curtain, analog clock, goldfish, king crab, African chameleon, parachute, pajama, isopod
+./Neuralgia/image107.jpg: prairie chicken, axolotl, platypus, spider web, lacewing, starfish, king crab, tarantula
+./Neuralgia/image108.jpg: axolotl, loggerhead, timber wolf, grey fox, dhole, garden spider, earthstar, banded gecko
+./Neuralgia/image109.jpg: rock python, lionfish, spotted salamander, sea slug, barracouta, hair slide, puffer, shower cap
+./Neuralgia/image110.jpg: mud turtle, sturgeon, Chesapeake Bay retriever, water snake, tailed frog, spotted salamander, book jacket, poncho
+./Neuralgia/image111.jpg: grey whale, sea snake, gar, vine snake, hammerhead, boa constrictor, goldfish, snail
+./Neuralgia/image112.jpg: horned viper, bolete, dugong, tench, American lobster, tiger shark, sea slug, African chameleon
+./Neuralgia/image113.jpg: bow, tench, American lobster, chiton, plow, rock crab, Gila monster, tiger shark
+./Neuralgia/image114.jpg: tarantula, eft, knot, snorkel, gong, conch, volcano, lionfish
+./Neuralgia/image115.jpg: black grouse, poncho, frilled lizard, diamondback, promontory, nematode, water snake, black stork
+./Neuralgia/image116.jpg: common newt, stingray, electric ray, sea snake, nematode, scorpion, goldfish, spiny lobster
+./Neuralgia/image117.jpg: banded gecko, rock python, velvet, pinwheel, swing, African chameleon, axolotl, flatworm
+./Neuralgia/image118.jpg: nematode, dhole, platypus, hare, night snake, wig, snorkel, vizsla
+./Neuralgia/image119.jpg: Indian cobra, barracouta, sea snake, isopod, sturgeon, sea cucumber, beaver, whiptail
+./Neuralgia/image120.jpg: wood rabbit, Dungeness crab, thunder snake, rock crab, sturgeon, hyena, Gila monster, hippopotamus
+./Neuralgia/image121.jpg: bloodhound, king snake, shower cap, red fox, tarantula, dhole, boa constrictor, wood rabbit
+./Neuralgia/image122.jpg: loggerhead, tailed frog, vine snake, terrapin, flatworm, green snake, European fire salamander, ringneck snake
+./Neuralgia/image123.jpg: green mamba, African chameleon, centipede, agama, African crocodile, sidewinder, horned viper, jellyfish
+./Neuralgia/image124.jpg: marmoset, triceratops, Gila monster, otter, mink, slug, brain coral, spiny lobster
+./Neuralgia/image125.jpg: wombat, snail, stingray, Bouvier des Flandres, rock crab, banded gecko, frilled lizard, flatworm
+./Neuralgia/image126.jpg: hair slide, poncho, chiton, hen, sea slug, volcano, sea urchin, mongoose
+./Neuralgia/image127.jpg: shower cap, jigsaw puzzle, conch, prairie chicken, shower curtain, sea slug, ruffed grouse, sock
+./Neuralgia/image128.jpg: conch, Irish terrier, Chihuahua, tabby, toy terrier, wire-haired fox terrier, sea anemone, Pekinese
+./Neuralgia/image129.jpg: studio couch, jigsaw puzzle, feather boa, Pomeranian, malinois, guinea pig, Pembroke, maraca
+./Neuralgia/image130.jpg: Chihuahua, Persian cat, Pekinese, quilt, Leonberg, guinea pig, chow, nipple
+./Neuralgia/image131.jpg: Tibetan terrier, Lhasa, tub, Blenheim spaniel, Chihuahua, Pomeranian, polecat, maraca
+./Neuralgia/image132.jpg: chow, Irish setter, maraca, Brittany spaniel, golden retriever, tub, soft-coated wheaten terrier, red fox
+./Neuralgia/image133.jpg: Yorkshire terrier, crayfish, guinea pig, clumber, toy terrier, sleeping bag, quilt, Airedale
+./Neuralgia/image134.jpg: sarong, toy poodle, fox squirrel, redbone, Scottish deerhound, Norwich terrier, Irish setter, handkerchief
+./Neuralgia/image135.jpg: cairn, tarantula, otter, sea snake, bath towel, marmoset, Airedale, dishrag
+./Neuralgia/image136.jpg: lion, cairn, Afghan hound, spiny lobster, electric ray, eel, wolf spider, bloodhound
+./Neuralgia/image137.jpg: lion, ibex, water snake, Yorkshire terrier, malinois, rock python, hermit crab, horned viper
+./Neuralgia/image138.jpg: American lobster, brain coral, ringneck snake, flatworm, hammerhead, Scottish deerhound, African crocodile, armadillo
+./Neuralgia/image139.jpg: wool, tench, stole, lionfish, trilobite, porcupine, rock beauty, platypus
+./Neuralgia/image140.jpg: buckeye, crayfish, briard, red fox, goldfish, barracouta, sidewinder, tench
+./Neuralgia/image141.jpg: agama, crayfish, hog, impala, puffer, rock beauty, grey fox, king crab
+./Neuralgia/image142.jpg: conch, hamster, prairie chicken, goldfish, sea snake, perfume, vase, mongoose
+./Neuralgia/image143.jpg: jigsaw puzzle, weasel, snail, black grouse, axolotl, Indian cobra, Airedale, crayfish
+./Neuralgia/image144.jpg: African crocodile, sea slug, ringlet, knot, diamondback, toy terrier, silky terrier, sea cucumber
+./Neuralgia/image145.jpg: rock crab, wreck, swing, chiton, sidewinder, prairie chicken, porcupine, zebra
+./Neuralgia/image146.jpg: Gila monster, dhole, goldfish, banded gecko, American lobster, house finch, lakeside, redshank
+./Neuralgia/image147.jpg: swimming trunks, hummingbird, jellyfish, rock crab, tray, bikini, hartebeest, shower curtain
+./Neuralgia/image148.jpg: banded gecko, bikini, red fox, pinwheel, fiddler crab, sarong, common newt, bucket
+./Neuralgia/image149.jpg: sea anemone, chiton, snorkel, conch, brassiere, bonnet, frilled lizard, sea slug
+./Neuralgia/image150.jpg: sea slug, frilled lizard, sea urchin, maraca, flatworm, Brabancon griffon, nipple, wire-haired fox terrier
+./Neuralgia/image151.jpg: knot, wool, armadillo, American lobster, poncho, isopod, maze, barracouta
+./Neuralgia/image152.jpg: snorkel, feather boa, maze, rock python, coral reef, Komodo dragon, dhole, tiger cat
+./Neuralgia/image153.jpg: lynx, mongoose, golden retriever, hog, axolotl, frilled lizard, brain coral, titi
+./Neuralgia/image154.jpg: banded gecko, bolete, hyena, African crocodile, otter, eel, gar, red wolf
+./Neuralgia/image155.jpg: otter, sea urchin, sea anemone, groenendael, triceratops, tailed frog, sea cucumber, quilt
+./Neuralgia/image156.jpg: otter, rock crab, ringneck snake, stingray, night snake, isopod, rock beauty, coral reef
+./Neuralgia/image157.jpg: slug, water snake, porcupine, frilled lizard, isopod, quill, starfish, hen-of-the-woods
+./Neuralgia/image158.jpg: diamondback, red fox, common newt, beaver, platypus, Indian cobra, bustard, chiton
+./Neuralgia/image159.jpg: cheetah, weasel, brain coral, water snake, bustard, coral reef, otter, chiton
+./Neuralgia/image160.jpg: shower curtain, partridge, cheetah, axolotl, chambered nautilus, rock beauty, thunder snake, chiton
+./Neuralgia/image161.jpg: hippopotamus, partridge, starfish, snorkel, quill, axolotl, eel, nematode
+./Neuralgia/image162.jpg: sea snake, platypus, thunder snake, eft, fox squirrel, goldfish, wild boar, hammerhead
+./Neuralgia/image163.jpg: Rottweiler, armadillo, scorpion, vine snake, eft, mud turtle, night snake, bullfrog
+./Neuralgia/image164.jpg: green mamba, velvet, chambered nautilus, terrapin, sea cucumber, wolf spider, axolotl, barracouta
+./Neuralgia/image165.jpg: anemone fish, hammerhead, hair slide, brain coral, common newt, American lobster, terrapin, dhole
+./Neuralgia/image166.jpg: brain coral, proboscis monkey, loggerhead, slug, Dungeness crab, house finch, conch, horned viper
+./Neuralgia/image167.jpg: maillot, house finch, horned viper, wood rabbit, anemone fish, American alligator, electric ray, platypus
+./Neuralgia/image168.jpg: ruffed grouse, Scotch terrier, platypus, brambling, American alligator, wombat, crayfish, Gila monster
+./Neuralgia/image169.jpg: chiton, alligator lizard, coral reef, whiptail, jellyfish, night snake, sea anemone, scorpion
+./Neuralgia/image170.jpg: sea anemone, coil, banded gecko, ant, shower curtain, velvet, frilled lizard, cock
+./Neuralgia/image171.jpg: pinwheel, diamondback, nematode, shower cap, confectionery, lionfish, carousel, snail
+./Neuralgia/image172.jpg: Petri dish, nematode, vase, goldfish, anemone fish, bow, axolotl, plunger
+./Neuralgia/image173.jpg: jellyfish, king crab, gar, Dungeness crab, plastic bag, goldfish, anemone fish, frilled lizard
+./Neuralgia/image174.jpg: house finch, eft, sea slug, ringlet, lionfish, Gila monster, rock crab, starfish
+./Neuralgia/image175.jpg: banded gecko, cock, feather boa, puffer, sea slug, gar, red fox, isopod
+./Neuralgia/image176.jpg: plunger, barracouta, shower curtain, loggerhead, hammerhead, horned viper, flamingo, jellyfish
+./Neuralgia/image177.jpg: eel, lionfish, comic book, sturgeon, chiton, sea urchin, dhole, tailed frog
+./Neuralgia/image178.jpg: Sussex spaniel, axolotl, sea urchin, tiger, fiddler crab, leopard, puffer, tench
+./Neuralgia/image179.jpg: nipple, rock python, titi, tabby, stole, tub, fox squirrel, loggerhead
+./Neuralgia/image180.jpg: potter's wheel, fox squirrel, starfish, eft, Yorkshire terrier, redbone, coral reef, tray
+./Neuralgia/image181.jpg: Australian terrier, crayfish, velvet, snorkel, puffer, sea anemone, fox squirrel, centipede
+./Neuralgia/image182.jpg: snorkel, nematode, tiger, toy terrier, quill, Australian terrier, sidewinder, ant
+./Neuralgia/image183.jpg: nematode, coral reef, stingray, snail, American lobster, ant, eel, book jacket
+./Neuralgia/image184.jpg: puffer, marmoset, spiny lobster, sleeping bag, snail, common newt, Indian cobra, sarong
+./Neuralgia/image185.jpg: green lizard, electric ray, loggerhead, poncho, vine snake, leopard, common newt, diamondback
+./Neuralgia/image186.jpg: maze, ringneck snake, isopod, American lobster, electric ray, sea snake, starfish, tarantula
+./Neuralgia/image187.jpg: Scotch terrier, wild boar, flatworm, triceratops, loggerhead, Australian terrier, goldfish, red wolf
+./Neuralgia/image188.jpg: loggerhead, chiton, frilled lizard, miniature pinscher, starfish, Australian terrier, snorkel, goldfish
+./Neuralgia/image189.jpg: starfish, shower curtain, Gila monster, coral reef, puffer, sea cucumber, prairie chicken, scuba diver
+./Neuralgia/image190.jpg: terrapin, mud turtle, starfish, agama, grey fox, mongoose, water snake, triceratops
+./Neuralgia/image191.jpg: starfish, toy terrier, rock beauty, barn spider, jellyfish, poncho, goldfish, standard schnauzer
+./Neuralgia/image192.jpg: fiddler crab, centipede, lionfish, dhole, house finch, eel, Angora, coral reef
+./Neuralgia/image193.jpg: goldfish, leatherback turtle, frilled lizard, ant, tench, boa constrictor, dugong, fiddler crab
+./Neuralgia/image194.jpg: goldfish, hog, tiger shark, loggerhead, malinois, wild boar, proboscis monkey, wood rabbit
+./Neuralgia/image195.jpg: otter, hog, tiger cat, coho, Scottish deerhound, tarantula, crayfish, armadillo
+./Neuralgia/image196.jpg: wallaby, warthog, tarantula, coyote, American black bear, tick, sloth bear, hog
+./Neuralgia/image197.jpg: chimpanzee, ruffed grouse, water buffalo, Indian cobra, otter, Airedale, common newt, red wolf
+./Neuralgia/image198.jpg: goldfish, jigsaw puzzle, horned viper, American lobster, dhole, hare, briard, hog
+./Neuralgia/image199.jpg: triceratops, brambling, bikini, rotisserie, kit fox, lionfish, grey fox, silky terrier
