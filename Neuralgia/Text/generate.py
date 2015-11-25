@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import nltk, random, re
+import nltk, random, re, argparse, sys, os.path
+
 
 TEXT = 'definitions.txt'
-LOG = 'log.txt'
 LINELENGTH = 6
 
 def makePairs(arr):
@@ -24,7 +24,21 @@ def generate(cfd, word = 'the', num = 50):
         words.append(word)
         word = arr[int((len(arr))*random.random())]     
     return words
-        
+
+
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("logfile",  type=str, help="Log file from neuralgia_control")
+parser.add_argument("linelength", type=int, help="Words per line")
+
+args = parser.parse_args()
+
+if not os.path.isfile(args.logfile):
+    print "Could not read %s" % args.logfile
+    sys.exit(-1)
+
+
 with open(TEXT, 'r') as f:
     corpus = f.read()
     corpus = corpus.split()
@@ -33,8 +47,7 @@ with open(TEXT, 'r') as f:
 
     line_re = re.compile('^(.*): (.*)$')
 
-
-    with open(LOG, 'r') as lf:
+    with open(args.logfile, 'r') as lf:
         for l in lf:
             m = line_re.match(l)
             if m:
@@ -45,7 +58,7 @@ with open(TEXT, 'r') as f:
                 for w in words:
                     start = w.replace(' ', '_')
                     try:
-                        line = ' '.join(generate(cfd, start, LINELENGTH))
+                        line = ' '.join(generate(cfd, start, args.linelength))
                     except IndexError as e:
                         print "ERROR: %s %s" % ( start, e )
                     print line.replace('_', ' ')

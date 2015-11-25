@@ -25,7 +25,7 @@ BLEND = "75"
 # SCALE = "8"
 # BLEND = "90"
 
-outfile = os.path.join(OUTDIR, "neuralgia2b.txt")
+outfile = os.path.join(OUTDIR, "neuralgia6.txt")
 
 start_targets = random.sample(range(0, 1000), NSTART)
 
@@ -35,7 +35,7 @@ start_targets = random.sample(range(0, 1000), NSTART)
 
 #subprocess.call(["./neuralgia.sh", OUTDIR, 'image0', conffile, SIZE, SCALE, BLEND])
 
-lastimage = "./Neuralgia/image0.jpg"
+lastimage = "./Neuralgia/Chapter5/image199.jpg"
 
 imagen = ImageNet("./Classes/classes.txt")
 
@@ -47,7 +47,7 @@ with open(outfile, 'w') as f:
 
 
 
-for i in range(1,200):
+for i in range(0,1):
     jsonfile = "./Neuralgia/conf%d.json" % i
     subprocess.call(["./classify.py", str(NTWEEN), str(NSAMPLE), lastimage, jsonfile])
     subprocess.call(["./neuralgia.sh", OUTDIR, "image%d" % i, jsonfile, SIZE, SCALE, BLEND])
