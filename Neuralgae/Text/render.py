@@ -2,7 +2,7 @@
 
 import pystache, os, os.path, re, shutil
 
-BASE = '/Users/mike/Desktop/DeepDream/deepdream/Neuralgia'
+BASE = '/Users/mike/Desktop/DeepDream/deepdream/Neuralgae'
 SRC = BASE
 DEST = os.path.join(BASE, 'Text', 'Output')
 
@@ -10,6 +10,21 @@ class Chapter(object):
     def __init__(self, c, stanzas):
         self.c = c
         self.stanzas = stanzas
+
+    def next(self):
+        n = int(self.c) + 1
+        if n < 6:
+            return 'book%d.html' % n
+        else:
+            return 'about.html'
+
+    def prev(self):
+        n = int(self.c) - 1
+        if n > 0:
+            return 'book%d.html' % n
+        else:
+            return './'
+        
 
 class Stanza(object):
     def __init__(self, c, n, lines):
@@ -67,7 +82,7 @@ renderer = pystache.Renderer()
 for cn in [ '1', '2', '3', '4', '5' ]:
     s = read_stanzas('./Stanzas/chapter%s.txt' % cn, cn)
     c = Chapter(cn, s)
-    of = './Output/chapter%s.html' % cn
+    of = './Output/book%s.html' % cn
     with open(of, 'w') as cf:
         cf.write(renderer.render(c))
         print("Wrote %s" % of)

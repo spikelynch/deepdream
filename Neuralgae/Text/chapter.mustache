@@ -26,39 +26,41 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 
-<div class="container">
+
+
+<div class="container-fluid">
   <div class="row">
-    <div class="col-md-10" role="main">
-      <div class="container">
-
-      {{ #stanzas }}
-        <div class="row">
-          <div class="col-sm-4 image">
-            <img src="img/{{ c }}/{{ n }}.jpg" />
-          </div>
-          <div class="col-sm-8 text">
-           {{ #lines }}
-           {{ line }}<br />
-           {{ /lines }}
-          </div>
+    <div class="col-sm-10" role="main">
+  {{ #stanzas }}
+      <div class="row">
+        <div class="col-sm-4 image"><img src="img/{{ c }}/{{ n }}.jpg" /></div>
+        <div class="col-sm-8 text">
+    {{ #lines }}
+    {{ line }}<br />
+    {{ /lines }}
         </div>
-      {{ /stanzas }}
       </div>
+{{ /stanzas }}
     </div>
-    <div class="col-md-2" role="complementary">
-      <nav class="hidden-print hidden-xs hidden-sm affix">
-      <p>neuralgia - a generated novel</p>
-      <ul class="nav">
-        <li><a href="chapter1.html">Book 1</a></li>
-        <li><a href="chapter2.html">Book 2</a></li>
-        <li><a href="chapter3.html">Book 3</a></li>
-        <li><a href="chapter4.html">Book 4</a></li>
-        <li><a href="chapter5.html">Book 5</a></li>
-        <li><a href="about.html">About / credits</a></li>
-      </ul>
+    <div class="col-sm-2 bs-docs-sidebar" role="complementary">
+  <nav id="sidebar" class="hidden-print affix">
+  NEURALGAE
+  <ul class="nav">
+    <li class="nav"><a href="./">HOME</a></li>
+    <li class="nav"><a href="book1.html">BOOK 1</a></li>
+    <li class="nav"><a href="book2.html">BOOK 2</a></li>
+    <li class="nav"><a href="book3.html">BOOK 3</a></li>
+    <li class="nav"><a href="book4.html">BOOK 4</a></li>
+    <li class="nav"><a href="book5.html">BOOK 5</a></li>
+    <li class="nav"><a href="about.html">ABOUT</a></li>
+  </ul>
+  </nav>
     </div>
-  </div>    
-</div>
-
+  </div>
+  </div>
+  <ul class="pager">
+    <li><a href="{{ prev }}">Previous</a>
+    <li><a href="{{ next }}">Next</a>
+  </ul>
   </body>
 </html>
