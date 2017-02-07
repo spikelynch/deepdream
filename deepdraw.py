@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # coding: utf-8
 
@@ -17,7 +17,7 @@ import argparse
 
 CAFFE_MODELS = '../caffe/models/'
 
-OUTPUT_DIR = './Output/Deepdraw/Places'
+OUTPUT_DIR = './Output/Deepdraw/'
 
 IMAGENET_CLASS = 1
 ALL_FRAMES = False

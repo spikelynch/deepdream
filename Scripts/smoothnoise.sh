@@ -5,7 +5,10 @@ working="./"
 
 convert -size 224x224 xc: +noise Random ${working}/random.png
 
-convert ${working}/random.png  -channel G  -function Sinusoid 1,0 \
-        -virtual-pixel tile -blur 0x16 -auto-level \
+convert ${working}/random.png  -channel G  \
+        -virtual-pixel tile -blur 0x10 -auto-level \
         -separate ${working}/gray.jpg
-convert ${working}/gray.jpg -colorspace rgb -type truecolor ${working}/$outfile
+
+convert ${working}/gray.jpg -function Sinusoid 2,90 ${Working}/gray2.jpg
+
+convert ${working}/gray2.jpg -colorspace rgb -type truecolor ${working}/$outfile

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
 
-model=caffenet
-target="randomise"
-dir="./Animations/CaffeNetDD/Random"
-working="./Animations/CaffenetDD/working"
+model="googlenet"
+size="224"
+target="496"
+sigma=".3"
+dir="./Animations/Xmas/"
+working="./Animations/Xmas/working"
 lastframe=""
 firstframe=""
 iters="200"
@@ -13,7 +15,7 @@ lblend="10"
 
 #mkdir -p "${dir}/${layer}"
 
-convert -size 227x227 xc: +noise Random ${working}/random.png
+convert -size ${size}x${size} xc: +noise Random ${working}/random.png
 
 lasti="350"
 
@@ -32,7 +34,7 @@ for i in `seq 0 10 359`; do
         cp ${working}/base_${i}.jpg ${working}/blended_${i}.jpg
     fi
        
-    ./dream.py --model $model --iters $iters --target $target --weight -1 --basefile frame_${i} ${working}/blended_${i}.jpg ${dir}
+    ./dream.py --model $model --iters $iters --target $target --sigma $sigma --basefile frame_${i} ${working}/blended_${i}.jpg ${dir}
     lastframe="${dir}/frame_${i}.jpg"
     if [ -n "${firstframe}" ]; then
         firstframe="${lastframe}"

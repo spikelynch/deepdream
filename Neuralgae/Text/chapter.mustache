@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Neuralgae - Chapter One</title>
+    <title>Neuralgae - Book {{c}}</title>
 
     <link href="css/neuralgae.css" rel="stylesheet">
     <!-- Bootstrap -->
@@ -26,13 +26,36 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="./">NEURALGAE</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="./">HOME</a></li>
+            <li><a href="book1.html">BOOK 1</a></li>
+            <li><a href="book2.html">BOOK 2</a></li>
+            <li><a href="book3.html">BOOK 3</a></li>
+            <li><a href="book4.html">BOOK 4</a></li>
+            <li><a href="book5.html">BOOK 5</a></li>
+            <li><a href="about.html">ABOUT</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
+  
 
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-sm-10" role="main">
+<div id="main"  class="container-fluid">
   {{ #stanzas }}
-      <div class="row">
+      <div class="row" id="stanza{{ n }}">
         <div class="col-sm-4 image"><img src="img/{{ c }}/{{ n }}.jpg" /></div>
         <div class="col-sm-8 text">
     {{ #lines }}
@@ -42,22 +65,6 @@
       </div>
 {{ /stanzas }}
     </div>
-    <div class="col-sm-2 bs-docs-sidebar" role="complementary">
-  <nav id="sidebar" class="hidden-print affix">
-  NEURALGAE
-  <ul class="nav">
-    <li class="nav"><a href="./">HOME</a></li>
-    <li class="nav"><a href="book1.html">BOOK 1</a></li>
-    <li class="nav"><a href="book2.html">BOOK 2</a></li>
-    <li class="nav"><a href="book3.html">BOOK 3</a></li>
-    <li class="nav"><a href="book4.html">BOOK 4</a></li>
-    <li class="nav"><a href="book5.html">BOOK 5</a></li>
-    <li class="nav"><a href="about.html">ABOUT</a></li>
-  </ul>
-  </nav>
-    </div>
-  </div>
-  </div>
   <ul class="pager">
     <li><a href="{{ prev }}">Previous</a>
     <li><a href="{{ next }}">Next</a>

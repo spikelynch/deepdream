@@ -5,9 +5,9 @@ from shutil import copy
 import subprocess
 import string
 
-origfile = 'Output/Loop4/google_f9719.jpg'
+origfile = 'LoopTrump/Loop4/google_f9719.jpg'
 tempfile = 'Output/tempfile.jpg'
-glide="-5 -background grey"
+glide="-5 -background sandybrown"
 script = './dream.py'
 model = 'googlenet'
 recipe_file = './Layers/places_layers.txt'
@@ -48,7 +48,7 @@ sigma = '.35'
 
 # print recipe
 
-recipe = [ 'inception_5b/output' ]
+recipe = [ 'inception_4d/pool_proj' ]
 
 
 i = startframe

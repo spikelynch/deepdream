@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # imports and basic notebook setup
 from cStringIO import StringIO
 import numpy as np
@@ -25,7 +25,9 @@ MODELS = {
     'cnn_gender': 'cnn_gender',
     'caffenet': 'bvlc_reference_caffenet',
     'ilsvrc13': 'bvlc_reference_rcnn_ilsvrc13',
-    'flickr_style': 'finetune_flickr_style'
+    'flickr_style': 'finetune_flickr_style',
+    'manga' : 'illustration2vec',
+    'manga_tag' : 'illustration2vec_tag'
 #    'cars' : 'cars'
 }
 
@@ -38,7 +40,9 @@ DEFAULT_LAYERS = {
     'cars': 'pool5',
     'caffenet': 'pool5',
     'ilsvrc13': 'pool5',
-    'flickr_style': 'pool5'
+    'flickr_style': 'pool5',
+    'manga': 'pool5',
+    'manga_tag': 'pool6'
 }
 
 CLASS_TARGET_LAYER = {
@@ -50,12 +54,15 @@ CLASS_TARGET_LAYER = {
     'cnn_age': 'fc8',
     'cnn_gender': 'fc8',
     'ilsvrc13': 'fc-rcnn',
-    'caffenet': 'fc8'
+    'caffenet': 'fc8',
+    'manga': 'encode1neuron',
+    'manga_tag': 'conv6_4'
 }
 
 N_CLASSES = {
     'googlenet': 1000,
     'caffenet': 1000,
+    'manga': 4096,
     'places': 205
 }
 
@@ -66,7 +73,9 @@ CLASS_BACKGROUND = 128.0
 MD_FILE = 'dream.json'
 
 MEAN_BINARIES = {
-    'cnn_age': 'cnn_age_gender/mean.binaryproto',
+#    'cnn_age': 'cnn_age_gender/mean.binaryproto',
+    'manga_tag': 'illustration2vec_tag/image_mean.npy',
+    'manga': 'illustration2vec_tag/image_mean.npy'
 }
 
 
@@ -87,9 +96,10 @@ def writearray(a, filename, fmt='jpeg'):
 
 
 def loadmean(filename):
-    proto_data = open(filename, "rb").read()
-    a = caffe.io.caffe_pb2.BlobProto.FromString(proto_data)
-    mean  = caffe.io.blobproto_to_array(a)[0]
+    #proto_data = open(filename, "rb").read()
+    #a = caffe.io.caffe_pb2.BlobProto.FromString(proto_data)
+    #mean  = caffe.io.blobproto_to_array(a)[0]
+    mean = np.load(filename)
     print "Loaded mean binary %s" % filename
     print mean.shape
     return mean
@@ -154,11 +164,11 @@ def objective_guide(guide_features, dst):
     x = dst.data[0].copy()       # the data
     y = guide_features           # the guide image
     ch = x.shape[0]              # the shape
-    print "objective_guide"
-    print "before", x.shape, y.shape
+    #print "objective_guide"
+    #print "before", x.shape, y.shape
     x = x.reshape(ch,-1)         # reshape these
     y = y.reshape(ch,-1)         # to match one another
-    print "after", x.shape, y.shape
+    #print "after", x.shape, y.shape
     A = x.T.dot(y)               # compute the matrix of dot-products with guide features
     dst.diff[0].reshape(ch,-1)[:] = y[:,A.argmax(1)] # select ones that match best
 
@@ -176,7 +186,7 @@ def make_objective_target(net, foci):
 def objective_targets(foci, dst):
     one_hot = np.zeros_like(dst.data)
     for focus, weight in foci.iteritems():
-        one_hot.flat[focus] = 1. * weight
+        one_hot.flat[focus] = 1.0 * weight
     dst.diff[:] = one_hot
 
 
@@ -216,9 +226,11 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
     net.backward(start=end)  # retrain
 
     g = src.diff[0]
-
-    # apply normalized ascent step to the input image
-    src.data[:] += step_size/np.abs(g).mean() * g
+    asc = np.abs(g).mean()
+    print " ascent step {}".format(asc)
+    if asc != 0:
+        # apply normalized ascent step to the input image
+        src.data[:] += step_size / np.abs(g).mean() * g
 
     src.data[0] = np.roll(np.roll(src.data[0], -ox, -1), -oy, -2) # unshift image
 
@@ -340,6 +352,7 @@ def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, cli
                 src.data[0] = tile
                 make_step(net, end=end, clip=clip, **step_params)
                 put_tile(image, src.data[0], x, y, w, h)
+                writearray(deprocess(net, src.data[0]), "frame%04d.jpg" % i)
     return deprocess(net, image)
 
 # spiral outwards, overlapping
@@ -568,10 +581,10 @@ if __name__ == '__main__':
         bfile = os.path.join(output_path, args.basefile)
     else:
         f, e = os.path.splitext(os.path.basename(origfile))
-        if e != '.jpg':
-            print "Input must be a jpg"
-            print "Got %s/%s" % ( f, e )
-            sys.exit(-1)
+        #if e != '.jpg':
+        #    print "Input must be a jpg"
+        #    print "Got %s/%s" % ( f, e )
+        #    sys.exit(-1)
         bfile = os.path.join(output_path, f)
 
         
@@ -669,7 +682,11 @@ if __name__ == '__main__':
         if args.frames > 1:
             filename = "%s_f%d.jpg" % ( bfile, fi )
         else:
-            filename = "%s.jpg" % bfile
+            if '.' in bfile:
+                # hack - if basefile has an extension, use it
+                filename = bfile
+            else:
+                filename = "%s.jpg" % bfile
         writearray(img, filename)
         print "Wrote frame %s" % filename
         if theta != 0:
