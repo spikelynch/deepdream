@@ -15,7 +15,16 @@ import os
 
 import caffe
 
-CAFFE_MODELS = '../caffe/models/'
+if 'CAFFE_PATH' in os.environ:
+    CAFFE_MODELS = os.path.join(os.environ['CAFFE_PATH'], 'models')
+else:
+    print """
+You need to set the environment variable CAFFE_PATH to the location of your
+Caffe installation
+"""
+    sys.exit(-1)
+
+#CAFFE_MODELS = '../caffe/models/'
 
 MODELS = {
     'googlenet': 'bvlc_googlenet',
@@ -63,9 +72,23 @@ N_CLASSES = {
     'googlenet': 1000,
     'caffenet': 1000,
     'manga': 4096,
-    'places': 205
+    'places': 205,
+    'manga_tag': 1538
 }
 
+
+DD_OCTAVES = [
+    {
+        'layer':'encode1neuron',
+        'iter_n':200,
+        'start_sigma':1.2,
+        'end_sigma':0.2,
+        'start_step_size':5.0,
+        'end_step_size':1.5
+    },
+]
+
+    
 MAGIC_TARGETS = [ 'randomise' ]
         
 CLASS_BACKGROUND = 128.0
@@ -186,7 +209,7 @@ def make_objective_target(net, foci):
 def objective_targets(foci, dst):
     one_hot = np.zeros_like(dst.data)
     for focus, weight in foci.iteritems():
-        one_hot.flat[focus] = 1.0 * weight
+        one_hot.flat[int(focus)] = 1.0 * weight
     dst.diff[:] = one_hot
 
 
@@ -227,7 +250,7 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
 
     g = src.diff[0]
     asc = np.abs(g).mean()
-    print " ascent step {}".format(asc)
+#    print " ascent step {}".format(asc)
     if asc != 0:
         # apply normalized ascent step to the input image
         src.data[:] += step_size / np.abs(g).mean() * g
@@ -315,16 +338,10 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
 
 
 
-# TODO:
+# have reverted this to the original code allowing multiple octaves as the
+# tiling stuff was bad and slow
 
-# parametrise the octaves so that they're unlinked from the above function
-
-# figure out a way to scale up the input to loss3/classifier and/or use
-# the other classifiers so that --target works on larger images.
-
-# basic tiles for now
-
-def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, clip=True, **step_params):
+def deepdraw(net, base_img, verbose_file=None, random_crop=True, octaves=DD_OCTAVES, end=default_layer, clip=True,  **step_params):
 
     # prepare base image
 
@@ -342,157 +359,73 @@ def deepdraw(net, base_img, verbose_file=None, iter_n=10, end=default_layer, cli
 
     src.reshape(1,3,h,w) # resize the network's input image size
 
-    tiles = make_tile_pattern(image, w, h)
+    if not octaves:
+        octaves = DD_OCTAVES
+        octaves['layer'] = CLASS_TARGET_LAYER[end]
 
-    for i in xrange(iter_n):
-        print "Iter %d" % i
-        for x, y in tiles:
-            tile = get_tile(image, x, y, w, h)
-            if len(tile):
-                src.data[0] = tile
-                make_step(net, end=end, clip=clip, **step_params)
-                put_tile(image, src.data[0], x, y, w, h)
-                writearray(deprocess(net, src.data[0]), "frame%04d.jpg" % i)
-    return deprocess(net, image)
+    vi = 0
+    for e,o in enumerate(octaves):
+        if 'scale' in o:
+            # resize by o['scale'] if it exists
+            image = nd.zoom(image, (1,o['scale'],o['scale']))
+        _,imw,imh = image.shape
+        
+        # select layer
+        layer = o['layer']
 
-# spiral outwards, overlapping
+        for i in xrange(o['iter_n']):
+            if imw > w:
+                if random_crop:
+                    # randomly select a crop 
+                    mid_x = (imw-w)/2.
+                    width_x = imw-w
+                    ox = np.random.normal(mid_x, width_x*0.3, 1)
+                    ox = int(np.clip(ox,0,imw-w))
+                    mid_y = (imh-h)/2.
+                    width_y = imh-h
+                    oy = np.random.normal(mid_y, width_y*0.3, 1)
+                    oy = int(np.clip(oy,0,imh-h))
+                    # insert the crop into src.data[0]
+                    src.data[0] = image[:,ox:ox+w,oy:oy+h]
+                else:
+                    ox = (imw-w)/2.
+                    oy = (imh-h)/2.
+                    src.data[0] = image[:,ox:ox+w,oy:oy+h]
+            else:
+                ox = 0
+                oy = 0
+                src.data[0] = image.copy()
 
-def make_tile_pattern(image, w, h):
-    _, imgw, imgh = image.shape
+            sigma = o['start_sigma'] + ((o['end_sigma'] - o['start_sigma']) * i) / o['iter_n']
+            step_size = o['start_step_size'] + ((o['end_step_size'] - o['start_step_size']) * i) / o['iter_n']
+            
+            make_step(net, end=layer, clip=clip, sigma=sigma, step_size=step_size, **step_params)
 
-    if imgw == w and imgh == h:
-        return [ ( 0, 0 ) ]
-
-    ox = (imgw - w) / 2
-    oy = (imgh - h) / 2
-
-    spiral = [  ]
-
-    r = 1
-    done = False
-
-    while not done:
-        sq = make_ring(imgw, imgh, w, h, r)
-        if sq:
-            spiral += sq
-            r += 1
-        else:
-            done = True
-    return spiral
-
-
-def make_ring(imgw, imgh, w, h, r):
-    sq = []
-    ox = (imgw - r * w) / 2
-    oy = (imgh - r * h) / 2
-    for x in range(r):
-        x1 = ox + x * w
-        y1 = oy
-        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
-    for y in range(1, r):
-        x1 = ox + (r - 1) * w
-        y1 = oy + y * h
-        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
-    for x in range(r - 2, -1, -1):
-        x1 = ox + x * w
-        y1 = oy + (r - 1) * h
-        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
-    for y in range(r - 2, 0, -1):
-        x1 = ox
-        y1 = oy + y * h
-        add_if_intersect(sq, imgw, imgh, x1, y1, w, h)
-    if len(sq):
-        print "Ring %d: %s" % ( r, sq )
-    return sq
-
-
-def add_if_intersect(sq, imgw, imgh, x, y, w, h):
-    if x < imgw and x > -w and y < imgh and y > -h:
-        sq.append((x, y))
-
-
-
-def get_tile(image, x, y, w, h):
-    _, imgw, imgh = image.shape
-    #print "get tile at %d, %d (%d, %d) from %d, %d" % ( x, y, w, h, imgw, imgh )
-    x2 = x + w
-    y2 = y + h
-    t = []
-    px = 0
-    py = 0
-    if x < 0:
-        px = x
-        x = 0
-    elif x2 > imgw:
-        px = x2 - imgw
-        x2 = imgw
-    if y < 0:
-        py = y
-        y = 0
-    elif y2 > imgh:
-        py = y2 - imgh
-        y2 = imgh
-    tile = image[:, x:x2, y:y2]
-    if px < 0:
-        p = padding(-px, y2 - y, tile)
-        tile = np.concatenate((p, tile), 1)
-    elif px > 0:
-        p = padding(px, y2 - y, tile)
-        tile = np.concatenate((tile, p), 1)
-    if py < 0:
-        p = padding(w, -py, tile)
-        tile = np.concatenate((p, tile), 2)
-    elif py > 0:
-        p = padding(w, py, tile)
-        tile = np.concatenate((tile, p), 2)
-    return tile
-
-
-
-def padding(w, h, tile):
-    """Generate padding with the average colour of tile"""
-#     padding = np.full((3, w, h), CLASS_BACKGROUND)
-#     return padding
-    r = np.full((w, h), np.mean(tile[0]))
-    g = np.full((w, h), np.mean(tile[1]))
-    b = np.full((w, h), np.mean(tile[2]))
-    p = np.array([ r, g, b ])
-    return p
-
-
-
-def put_tile(image, data, x, y, w, h):
-    _, imgw, imgh = image.shape
-    # x1/y1/x2/y2: in image
-    # u1/v1/u2/v2: in data
-    x1 = x
-    y1 = y
-    x2 = x + w
-    y2 = y + h
-    u1 = 0
-    v1 = 0
-    u2 = w
-    v2 = h
-    if x < 0:
-        u1 = -x
-        x1 = 0
-    elif x2 > imgw:
-        u2 = w - (x2 - imgw)   #fix
-        x2 = imgw
-    if y < 0:
-        v1 = -y
-        y1 = 0
-    elif y2 > imgh:
-        v2 = h - (y2 - imgh)    #fix
-        y2 = imgh
-    image[:,x1:x2,y1:y2] = data[:,u1:u2,v1:v2]
-
-
+            if verbose_file:
+                vis = deprocess(net, src.data[0])
+                if not clip: # adjust image contrast if clipping is disabled
+                    vis = vis*(255.0/np.percentile(vis, 99.98))
+                if i % 1 == 0:
+                    writearray(vis,os.path.join(verbose_file, "dd_frame"+str(vi)+".jpg"))
+                    vi += 1
+            
+            if i % 10 == 0:
+                print 'finished step %d in octave %d' % (i,e)
+            
+            # insert modified image back into original image (if necessary)
+            image[:,ox:ox+w,oy:oy+h] = src.data[0]
+        
+        print "octave %d image:" % e
+        writearray(deprocess(net, image),"./octave_"+str(e)+".jpg")
+            
+    # returning the resulting image
+    return deprocess(net, image)    
 
 def parse_classes(s, w):
     if s == 'nil':
         return {}
-    try:
+    numeric_re = re.compile('^[0-9,-]*$')
+    if numeric_re.search(s):
         il = []
         for c1 in s.split(','):
             c2 = c1.split('-')
@@ -508,9 +441,19 @@ def parse_classes(s, w):
             weight = w
         c = { f: weight for f in il }
         return c
-    except ValueError():
-        print "Bad class"
-        return {}
+    else:
+        return load_classes(s)
+
+
+def load_classes(jf):
+    try:
+        with open(jf) as f:
+            js = json.load(f)
+#            print "Loaded JSON classes: {}".format(js)
+            return js
+    except Exception():
+        print "JSON load {} failed".format(jf)
+        sys.exit(-1)
 
 
 def write_json(bfile, args):
@@ -518,16 +461,20 @@ def write_json(bfile, args):
     with open(jsonfile, 'wb') as jf:
         jf.write(json.dumps(args, sort_keys=True, indent=4))
 
-# TODO: add the octaves to the json output and input
-# default octaves stored in a config file somewhere (actually all
-# defaults)?
 
-def read_json(jfile):
+def read_json(args, jfile):
     a = argparse.Namespace()
     with open(jfile, 'rb') as jf:
         data = json.load(jf)
         for arg, value in data.iteritems():
             a.__setattr__(arg, value)
+    confv = vars(a)
+    print("{} {}".format(confv, type))
+    for arg in vars(args):
+        if not arg in confv:
+            v = getattr(args, arg)
+            a.__setattr__(arg, v)
+            print("Default value of missing conf {}: {}".format(arg, v))
     return a
 
 
@@ -554,14 +501,16 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--weight", type=float, help="Weight of ImageNet classes", default=None)
     parser.add_argument("-i", "--iters",  type=int, help="Number of iterations per octave", default=10)
     parser.add_argument("-o", "--octaves", type=int, help="Number of octaves", default=4)
+    parser.add_argument("-d", "--deepdraw", type=str, default=None, help="Deepdraw octaves (JSON file)")
     parser.add_argument("-s", "--sigma", type=float, help="Blur (sigma)", default=0)
     parser.add_argument("-u", "--glide", type=str, help="Glide between frames x,y", default=None)
-    parser.add_argument("-v", "--verbose", action='store_true', help="Dump out a file for every iteration", default=False)
+    parser.add_argument("-v", "--verbose", type=str, help="Dump out a file for every iteration", default=None)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=0)
     parser.add_argument("-r", "--rotate", type=int, help="Rotate in degrees", default=0)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
     parser.add_argument("-j", "--initial", type=int, help="Initial frame #", default=0)
     parser.add_argument("-k", "--keys", action='store_true', help="Dump a list of available layers", default=False)
+    parser.add_argument("-n", "--nojson", action='store_true', help="Don't write out a json config file", default=False)
     args = parser.parse_args()
      
     origfile = args.input
@@ -592,7 +541,7 @@ if __name__ == '__main__':
         if not os.path.isfile(args.config):
             print "Config file %s not found" % args.config
             sys.exit(-1)
-        args = read_json(args.config)
+        args = read_json(args, args.config)
 
             
 
@@ -603,12 +552,12 @@ if __name__ == '__main__':
             args.target = foci
         
     # TODO: if bfile exists, add something to its name 
-
-    write_json(bfile, vars(args))
+    if not ('nojson' in args and args.nojson ): 
+        write_json(bfile, vars(args))
 
     vfile = None
     if args.verbose:
-        vfile = bfile
+        vfile = args.verbose
 
     print "Loading %s" % origfile
 
@@ -656,9 +605,13 @@ if __name__ == '__main__':
             foci = []
         print foci
         layer = CLASS_TARGET_LAYER[args.model]
+        dd_octaves = DD_OCTAVES
+        dd_octaves[0]['layer'] = layer
+        if args.deepdraw:
+            with open(args.deepdraw) as ddj:
+                dd_octaves = json.load(ddj)
         obj_class = make_objective_target(net, foci)
-        dreamer = lambda x: deepdraw(net, x, verbose_file=vfile, iter_n=args.iters, end=layer, objective=obj_class, sigma=args.sigma)
-        #dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, tiling=True, end=layer, objective=obj_class, sigma=args.sigma)
+        dreamer = lambda x: deepdraw(net, x, verbose_file=args.verbose, octaves=dd_octaves, end=layer, objective=obj_class)
     else:
         dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, sigma=args.sigma, end=layer)
 
