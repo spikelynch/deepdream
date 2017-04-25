@@ -4,12 +4,12 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = './Input/blobs.jpg'
+origfile = './Input/manga.jpg'
 model = 'manga_tag'
-recipe = 'Layers/layers_manga.txt'
+recipe = 'Layers/layers_manga_features.txt'
 script = './dream.py'
-iters = '20'
-path = './Output/MangaLayersTag/'
+iters = '40'
+path = './Output/MFeatures/'
 
 content = None
 
