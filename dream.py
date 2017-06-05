@@ -494,7 +494,8 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--model", type=str, help="The model", choices=models, default='googlenet')
     parser.add_argument("-l", "--layer", type=str, help="The layer")
     parser.add_argument("-b", "--basefile", type=str, help="Base filename", default=None)
-    parser.add_argument("-g", "--guide", type=str, help="The guide image", default=None)
+    parser.add_argument("-g", "--gpu", action="store_true", help="Run in GPU mode", default=False)
+    parser.add_argument("-a", "--guide", type=str, help="The guide image", default=None)
     parser.add_argument("-e", "--guidelayer", type=str, help="The guide layer", default='inception_3b/output')
     parser.add_argument("-t", "--target", type=str, help="ImageNet class(es) (comma separated)", default=None)
     parser.add_argument("-w", "--weight", type=float, help="Weight of ImageNet classes", default=None)
@@ -562,6 +563,9 @@ if __name__ == '__main__':
 
     img = np.float32(PIL.Image.open(origfile))
 
+    if args.gpu:
+        print "Setting GPU mode..."
+        caffe.set_mode_gpu()
 
     print "Starting neural net..."
 
