@@ -1,0 +1,110 @@
+List of layer nicknames
+=======================
+
+pool1
+norm1           Rainbow zigzag
+3x3_s2          Little 80s
+
+pool1
+3x3_s2          Rainbow quadrons
+
+pool4
+3x3_s2          Bowling Fruit
+
+conv1
+7x7_s2    Big 80s
+
+conv2
+3x3                Trilons
+3x3_reduce         Rugose
+norm2              Rainbow knots
+
+inception_3a
+1x1         Pixel stars
+3x3         Descending trilons
+3x3_reduce  Quadrons
+5x5         Rainbow fire
+5x5_reduce  Rainbow dust
+output      Ribbed
+pool        Twistors
+pool_proj   Rainblur
+
+inception_3b
+1x1         Purple topography
+3x3         Lavender
+3x3_reduce  Square ribs
+5x5         Swirling ribs
+5x5_reduce  Bend sinister
+output      Romanesco
+pool        Grill spiral
+pool_proj   Twinkle spiral
+
+inception_4a
+1x1         Spiral warts
+3x3         Aztec
+3x3_reduce  Romanesque Spirals
+5x5         Bad corridors
+5x5_reduce  Ramps
+output      Triple arches
+pool        Spiral equipment
+pool_proj   Spiral consoles
+
+inception_4b
+1x1         Spiral gardens
+3x3         Fan fountains
+3x3_reduce  Pond arcades
+5x5         Tree-tower campus
+5x5_reduce  Prismatic campus
+output      Votive cars
+pool        Casino vortex
+pool_proj   Druglord campus
+
+inception_4c
+1x1         Pagoda candy
+3x3         Fountain-fruit-train
+3x3_reduce  Fruit-train-fountain
+5x5         Stadium tiling
+5x5_reduce  Unstable lighthouse theatre
+output      Pagoda ballgame
+pool        Luxury votive cars
+pool_proj   Car temples
+
+inception_4d
+1x1         Staircase pagodas
+3x3         Fruit bun pagoda apparition
+3x3_reduce  Bowling fruit pagodas
+5x5         The big ballgame
+5x5_reduce  Baseball tesseract
+output      Bowling windfarm fountains
+pool        Pagoda bowling library
+pool_proj   Water trains
+
+inception_4e
+1x1         Fountain stupa
+3x3         Inverted world
+3x3_reduce  Inverted fountain world
+5x5         Cathedrals of Endor
+5x5_reduce  Thunderbolt pagoda
+output      Amphitheatres
+pool        Pagoda corridors
+pool_proj   Fountain airline
+
+inception_5a
+1x1         The incredible fruitshop
+3x3         Landscape with antimatter
+3x3_reduce  Dream towers
+5x5         Last Train to Shangri-La
+5x5_reduce  Internal airline
+output      Solipsist airline
+pool        Plasma metropolis
+pool_proj   Multiphase mall
+
+
+inception_5b
+1x1         Warp room
+3x3         Spacetime Stadium
+3x3_reduce  Hallucination tablets
+5x5         Moulin Rouge Express
+5x5_reduce  Vertigo viaducts
+pool        Breakdown tablets
+pool_proj   Train Stadium Cabin

@@ -1,0 +1,3 @@
+conv6_3
+encode1
+encode1neuron
