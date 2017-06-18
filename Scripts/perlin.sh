@@ -394,7 +394,7 @@ until [ $dim -gt $maxwh ]; do
 done
 
 convert $tmpA1 -gravity center -crop ${width}x${height}+0+0 +repage \
-	$setcolor -auto-level "$outfile"
+	$setcolor  "$outfile"
 
 exit 0
 
