@@ -1,0 +1,16 @@
+inception_4a/1x1
+inception_4a/3x3_reduce
+inception_4a/3x3
+inception_4a/5x5_reduce
+inception_4a/5x5
+inception_4a/pool
+inception_4a/pool_proj
+inception_4a/output
+inception_4b/1x1
+inception_4b/3x3_reduce
+inception_4b/3x3
+inception_4b/5x5_reduce
+inception_4b/5x5
+inception_4b/pool
+inception_4b/pool_proj
+inception_4b/output
