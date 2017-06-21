@@ -4,7 +4,7 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'Input/grey.jpg'
+origfile = 'Input/desaturated.jpg'
 outdir = 'Output'
 script = './dream.py'
 model = 'manga_tag'
