@@ -18,7 +18,7 @@ echo "gradient ${gradient}"
 echo "levels ${level}"
 echo "blur ${blur}"
 
-/Users/mike/Desktop/DeepDream/deepdream/scripts/perlin.sh ${geom} -m ${mode} -a ${att} ${working}/perlin.jpg
+$HOME/deepdream/Scripts/perlin.sh ${geom} -m ${mode} -a ${att} ${working}/perlin.jpg
 
 convert -size ${geom} ${gradient} ${working}/fade.jpg 
 composite -blend ${blend} ${working}/perlin.jpg ${working}/fade.jpg ${working}/comp.jpg

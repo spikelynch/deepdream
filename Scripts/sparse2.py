@@ -2,7 +2,7 @@
 
 import random, subprocess, argparse, itertools
 
-COLORFILE = '/opt/X11/share/X11/rgb.txt'
+COLORFILE = '/shared/homes/960700/neuralgae/src/rgb.txt'
 NC = 4
 NP = 20
 XMAX = 1024

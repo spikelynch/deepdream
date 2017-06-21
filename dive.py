@@ -12,7 +12,7 @@ recipe_file = './Layers/layers_manga_high.txt'
 iters = '2'
 octaves = '5'
 frames = '20'
-basefile = 'Dive6/manga'
+basefile = 'DiveManga'
 startframe = 0
 zoom = '0.05'
 

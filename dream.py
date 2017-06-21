@@ -638,11 +638,7 @@ if __name__ == '__main__':
         if args.frames > 1:
             filename = "%s_f%d.jpg" % ( bfile, fi )
         else:
-            if '.' in bfile:
-                # hack - if basefile has an extension, use it
-                filename = bfile
-            else:
-                filename = "%s.jpg" % bfile
+            filename = "%s.jpg" % bfile
         writearray(img, filename)
         print "Wrote frame %s" % filename
         if theta != 0:
