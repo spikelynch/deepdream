@@ -630,10 +630,13 @@ if __name__ == '__main__':
             gy = int(g0[1])
 
     print "Shape" , img.shape
+    (ox, oy, _) = img.shape
     s = args.zoom
     theta = args.rotate
     fi = args.initial
+    print "Frames in this pass: {}".format(args.frames)
     for i in xrange(args.frames):
+        print "Frame {} ({})".format(i, fi)
         img = dreamer(img)
         if args.frames > 1:
             filename = "%s_f%d.jpg" % ( bfile, fi )
@@ -650,6 +653,12 @@ if __name__ == '__main__':
         if gx != 0 or gy != 0:
             print "glide %d ,%d" % ( gx, gy )
             img = nd.shift(img, [ gy, gx, 0], mode='nearest')
+        (nx, ny, _) = img.shape
+        if nx != ox:
+            k = 1.0 * ox / nx
+            print "resizing {} -> {}: {}".format(ox, nx, k)
+            img = nd.zoom(img, (k, k, 1))
+            print "New shape = {}".format(img.shape)
         fi += 1
 
 
