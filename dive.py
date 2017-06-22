@@ -13,8 +13,8 @@ recipe = range(512)
 iters = '2'
 octaves = '5'
 dd_octaves = '../neuralgae/src/Control/Renderers/manga_quick_scale.json'
-frames = '48'
-basefile = 'Dive6/manga'
+frames = '2'
+basefile = 'Dive7/manga'
 startframe = 0
 zoom = '0.05'
 
@@ -29,13 +29,10 @@ for target in recipe:
     a = [ script, "--model", model, "--target", str(target), "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile, outdir ]
     print ' '.join(a)
     subprocess.call(a)
-    sys.exit()
     if os.path.isfile(newfile):
-        rfile = newfile + '.resize.jpg'
-        print "found newfile, resizing to {}".format(rfile)
-        r = [ 'convert', '-resize', origsize, newfile, rfile  ]
-        subprocess.call(r)
-        origfile = rfile
+        resizefile = newfile + ".resize.jpg"
+        subprocess.call(['convert', '-resize', origsize, newfile, resizefile])
+        origfile = resizefile
         i += f
     else:
         print "using lastfile {}".format(lastfile)
