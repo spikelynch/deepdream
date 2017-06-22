@@ -26,7 +26,7 @@ octaves = [
     'o_purple_7.json',
     'o_purple_8.json'
     ]
-repeats = 1; 
+    repeats = 1; 
 dream_script = './dream.py'
 classify_script = '../neuralgae/src/classify.py'
 remote = '../neuralgae/src/remote.json'
