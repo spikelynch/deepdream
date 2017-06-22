@@ -5,26 +5,18 @@ import subprocess
 import string
 
 origfile = 'Input/desaturated.jpg'
+origsize = '224x224'
 outdir = 'Output'
 script = './dream.py'
 model = 'manga_tag'
-recipe_file = './Layers/layers_manga_high.txt'
+recipe = range(512)
 iters = '2'
 octaves = '5'
+dd_octaves = '../neuralgae/src/Control/Renderers/manga_big_grad.json'
 frames = '20'
 basefile = 'DiveManga'
 startframe = 0
 zoom = '0.05'
-
-recipe = None
-
-with open(recipe_file) as f:
-    recipe = [ x.strip('\n') for x in f.readlines() ]
-
-if not recipe:
-    sys.exit()
-
-print recipe
 
 
 
@@ -32,13 +24,16 @@ i = startframe
 f = int(frames)
 lastfile = origfile
 
-for layer in recipe:
+for target in recipe:
     newfile = os.path.join(outdir, basefile + ('_f%d.jpg' % (i + f - 1)))
-    a = [ script, "--model", model, "--layer", layer, "--basefile", basefile, "--iters", iters, "--octaves", octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile, outdir ]
+    a = [ script, "--model", model, "--target", str(target), "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile, outdir ]
     print ' '.join(a)
     subprocess.call(a)
     if os.path.isfile(newfile):
-        origfile = newfile
+        rfile = newfile + '.resize.jpg'
+        r = [ 'convert', '-resize', origsize, newfile, rfile  ]
+        subprocess.call(r)
+        origfile = rfile
         i += f
     else:
         origfile = lastfile
