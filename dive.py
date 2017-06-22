@@ -4,17 +4,17 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'Input/desaturated.jpg'
+origfile = 'Input/bg.jpg'
 origsize = '224x224'
 outdir = 'Output'
 script = './dream.py'
 model = 'manga_tag'
-recipe = range(512)
+recipe = range(5)
 iters = '2'
 octaves = '5'
 dd_octaves = '../neuralgae/src/Control/Renderers/manga_big_grad.json'
 frames = '20'
-basefile = 'DiveManga'
+basefile = 'Dive/manga'
 startframe = 0
 zoom = '0.05'
 
@@ -26,7 +26,7 @@ lastfile = origfile
 
 for target in recipe:
     newfile = os.path.join(outdir, basefile + ('_f%d.jpg' % (i + f - 1)))
-    a = [ script, "--model", model, "--target", str(target), "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile, outdir ]
+    a = [ script, "--gpu", "--model", model, "--target", str(target), "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile, outdir ]
     print ' '.join(a)
     subprocess.call(a)
     if os.path.isfile(newfile):
