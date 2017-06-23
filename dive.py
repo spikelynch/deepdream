@@ -9,12 +9,12 @@ origsize = '224x224'
 outdir = 'Output'
 script = './dream.py'
 model = 'manga_tag'
-recipe = range(5)
+recipe = range(64)
 iters = '2'
 octaves = '5'
 dd_octaves = '../neuralgae/src/Control/Renderers/manga_big_grad.json'
 frames = '48'
-basefile = 'Dive/manga'
+basefile = 'Dive3/manga'
 startframe = 0
 zoom = '0.05'
 
@@ -29,13 +29,10 @@ for target in recipe:
     a = [ script, "--gpu", "--model", model, "--target", str(target), "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", frames, "--zoom", zoom, "--initial", str(i), origfile, outdir ]
     print ' '.join(a)
     subprocess.call(a)
-    sys.exit()
     if os.path.isfile(newfile):
-        rfile = newfile + '.resize.jpg'
-        print "found newfile, resizing to {}".format(rfile)
-        r = [ 'convert', '-resize', origsize, newfile, rfile  ]
-        subprocess.call(r)
-        origfile = rfile
+        resizefile = newfile + ".resize.jpg"
+        subprocess.call(['convert', '-resize', origsize, newfile, resizefile])
+        origfile = resizefile
         i += f
     else:
         print "using lastfile {}".format(lastfile)
