@@ -414,8 +414,8 @@ def deepdraw(net, base_img, verbose_file=None, random_crop=True, octaves=DD_OCTA
             # insert modified image back into original image (if necessary)
             image[:,ox:ox+w,oy:oy+h] = src.data[0]
         
-        print "octave %d image:" % e
-        writearray(deprocess(net, image),"./octave_"+str(e)+".jpg")
+        #print "octave %d image:" % e
+        #writearray(deprocess(net, image),"./octave_"+str(e)+".jpg")
             
     # returning the resulting image
     return deprocess(net, image)    
@@ -663,3 +663,4 @@ if __name__ == '__main__':
 
 
     print "Done"
+

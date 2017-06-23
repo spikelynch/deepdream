@@ -1,20 +1,25 @@
 #!/usr/bin/env python2
 
+
 import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'Input/bg.jpg'
-origsize = '224x224'
+#origfile = 'Input/desaturated.jpg'
+#origsize = '224x224'
+origfile = 'Input/base.jpg'
+origsize = '320x240'
 outdir = 'Output'
 script = './dream.py'
-model = 'manga_tag'
-recipe = range(64)
+# model = 'manga_tag'
+model = 'googlenet'
+recipe = range(512)
 iters = '2'
 octaves = '5'
-dd_octaves = '../neuralgae/src/Control/Renderers/manga_big_grad.json'
-frames = '48'
-basefile = 'Dive3/manga'
+# dd_octaves = '../neuralgae/src/Control/Renderers/manga_quick_scale.json'
+dd_octaves = '../neuralgae/src/Control/Renderers/googlenet_quick.json' 
+frames = '24'
+basefile = 'Dive4/google'
 startframe = 0
 zoom = '0.05'
 
