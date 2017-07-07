@@ -14,25 +14,25 @@ model = 'manga_tag'
 recipe = range(512)
 iters = '2'
 octaves = '5'
-dd_octaves = '../neuralgae/src/Control/Renderers/manga_dive_grad.json'
-# dd_octaves = '../neuralgae/src/Control/Renderers/googlenet_quick.json' 
-frames = '12'
-basefile = 'Dive5/manga'
+dd_octaves = 'Manga/manga_dive_light.json'
+frames = '6'
+basefile = 'Dive6/manga'
 startframe = 0
 zoom = '0.01'
 
+nsteps = 8 
+nbetween = 8
 
 def do_sequence(origfile, startf, targets):
     a = [ script, "--gpu", "--model", model, "--target", targets, "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", frames, "--zoom", zoom, "--initial", str(startf), origfile, outdir ]
     print ' '.join(a)
     subprocess.call(a)
-    f = int(frames)
-    newfile = os.path.join(outdir, basefile + ('_f%d.jpg' % (startf + f - 1)))
+    newfile = os.path.join(outdir, basefile + ('_f%d.jpg' % (startf + nframes - 1)))
     if os.path.isfile(newfile):
         resizefile = newfile + ".resize.jpg"
         subprocess.call(['convert', '-resize', origsize, newfile, resizefile])
         endfile = resizefile
-        startf += f
+        startf += nframes
     else:
         print "using lastfile {}".format(lastfile)
         endfile = lastfile
@@ -44,13 +44,19 @@ i = startframe
 f = int(frames)
 lastfile = origfile
 
+
+steps = [ (n + 1) * 1.0 / nsteps for n in range(nsteps) ]
+
+print steps
+
+origfile, i = do_sequence(origfile, i, f * nbetween, '{{ "{}": 1 }}'.format(recipe[0]))
 lasttarget = recipe[0]
 
-
 for target in recipe[1:]:
-    for step in [ 0, .25, .5, .75 ]:
+    for step in steps:
         t = '{{ "{}":{}, "{}":{} }}'.format(target, step, lasttarget, 1 - step)
         print t
-        origfile, i = do_sequence(origfile, i, t)
-        lasttarget = target
+        origfile, i = do_sequence(origfile, i, f, t)
+    lasttarget = target
+    origfile, i = do_sequence(origfile, i, f * nbetween, '{{ "{}": 1 }}'.format(target))
 
