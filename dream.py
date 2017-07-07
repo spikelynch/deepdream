@@ -423,6 +423,9 @@ def deepdraw(net, base_img, verbose_file=None, random_crop=True, octaves=DD_OCTA
 def parse_classes(s, w):
     if s == 'nil':
         return {}
+    jt = json_parse_classes(s)
+    if jt:
+        return jt
     numeric_re = re.compile('^[0-9,-]*$')
     if numeric_re.search(s):
         il = []
@@ -443,6 +446,16 @@ def parse_classes(s, w):
     else:
         return load_classes(s)
 
+
+def json_parse_classes(mjs):
+    try:
+        js = json.loads(mjs)
+        return js
+    except ValueError, e:
+        print e
+        return None
+
+    
 
 def load_classes(jf):
     try:
