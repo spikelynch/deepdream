@@ -4,19 +4,19 @@ import sys, os, os.path, random
 import subprocess
 import string
 
-COLORFILE = '/opt/X11/share/X11/rgb.txt'
-LAYERFILE = './Layers/layers_manga_high.txt'
+COLORFILE = '/shared/homes/960700/neuralgae/src/rgb.txt'
+LAYERFILE = './Layers/high_layers.txt'
 
 script = './dream.py'
 origfile = './working/bg1.jpg'
-model = 'manga_tag'
+model = 'places'
 const_layer = 'inception_4d/pool_proj'
-iters = 20
+iters = 200
 octaves = 4 
-repeats = 10
-width = 512
-height = 512
-path = './Output/MangaTag'
+repeats = 20
+width = 1024 
+height = 768
+path = './Output/PlacesHigh'
 
 fsin = 'Sinusoid {},90'
 
@@ -26,12 +26,12 @@ oc = [ './Scripts/background.sh', str(width) + 'x' + str(height), 'gray', '10', 
 
 #oc = [ './Scripts/sparse2.py', '--width', str(width), '--height', str(height), '--colours', '4', '--points', '8', '--blend', '50', '--algorithm', 'voronoi', '--blgorithm', 'shepards', '--blur', '0x8' ]
 
-layers = [ 'conv6_1', 'conv6_2', 'conv6_3', 'conv6_4' ]
-# with open(LAYERFILE, 'r') as lf:
-#     for x in lf:
-#         x = x.strip('\n')
-#         fields = x.split()
-#         layers.append(fields[0])
+layers = [ 'inception_5b/output' ]
+#with open(LAYERFILE, 'r') as lf:
+#    for x in lf:
+#        x = x.strip('\n')
+#        fields = x.split()
+#        layers.append(fields[0])
 
         
 colors = []
@@ -120,6 +120,6 @@ for i in range(0, repeats):
     layer = random.choice(layers)
     basefile = 'image{}.jpg'.format(i)
     #model = random.choice([ "googlenet" ])
-    a = [ script, "--model", model, "--layer", layer, "--iters", str(iters), "--octaves", str(octaves), "--basefile", basefile, start, path ]
+    a = [ script, "--gpu", "--model", model, "--layer", layer, "--iters", str(iters), "--octaves", str(octaves), "--basefile", basefile, start, path ]
     print ' '.join(a)
     subprocess.call(a)
