@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import random, subprocess, argparse, itertools
 
@@ -38,7 +38,7 @@ def sparse(algorithm, points, filename):
     im = [ 'convert', '-size', '{}x{}'.format(XMAX, YMAX), 'xc:', '-sparse-color', algorithm, points, filename ]
     cmd = ' '.join(im)
     print(cmd)
-    rv = subprocess.run(cmd, shell=True)
+    rv = subprocess.call(cmd, shell=True)
     return (not rv)
 
 
@@ -93,25 +93,25 @@ if args.blgorithm:
     sparse(args.algorithm, points, 'a1.jpg')
     sparse(args.blgorithm, points, 'b1.jpg')
     merge = [ 'composite', '-blend', str(args.blend), 'a1.jpg', 'b1.jpg', args.output]
-    rv = subprocess.run(' '.join(merge), shell=True)
+    rv = subprocess.call(' '.join(merge), shell=True)
 else:
     sparse(args.algorithm, points, args.output)
 
 if args.gradient:
     grad = [ 'convert', '-size', geometry, args.gradient, 'fade.jpg' ]
     print(grad)
-    subprocess.run(' '.join(grad), shell=True)
+    subprocess.call(' '.join(grad), shell=True)
     merge = [ 'composite', '-blend', '50', 'fade.jpg', args.output, args.output ]
-    subprocess.run(' '.join(merge), shell=True)
+    subprocess.call(' '.join(merge), shell=True)
 
 
     
 if args.blur:
     blur = [ 'convert', '-blur', args.blur, args.output, args.output ]
-    rv = subprocess.run(' '.join(blur), shell=True)
+    rv = subprocess.call(' '.join(blur), shell=True)
 
 ensure_col = [ 'convert', args.output, '-colorspace', 'rgb', '-type', 'truecolor', args.output ]
-rv = subprocess.run(' '.join(ensure_col), shell=True)
+rv = subprocess.call(' '.join(ensure_col), shell=True)
 
 
     
