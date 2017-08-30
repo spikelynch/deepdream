@@ -5,24 +5,33 @@ import sys, os, os.path
 import subprocess
 import string
 
-#origfile = 'Input/base.jpg'
-origfile = 'Output/Dive6/manga_f46560.jpg'
-origsize = '320x240'
-outdir = 'Output'
+
+
+origfile = 'Input/start.jpg'
+origsize = '512x384'
+
+bgparams = [ 'Scripts/background.sh', origsize, "color", "8", "70", "gradient:gray90-gray10", "10%,90%", "0x8" ]
+
+outdir = 'Manga/Dive'
 script = './dream.py'
 model = 'manga_tag'
 # model = 'googlenet'
-recipe = range(486,512)
+recipe = range(8) 
 iters = '2'
 octaves = '5'
-dd_octaves = 'Manga/manga_dive_light.json'
-frames = '6'
-basefile = 'Dive6/manga'
-startframe = 46561 
-zoom = '0.01'
+dd_octaves = 'Manga/manga_dive_3.json'
+frames = '36'
+basefile = 'manga'
+startframe = 1 
+zoom = '0.001'
 
 nsteps = 8 
 nbetween = 8
+
+def do_start():
+    a = bgparams
+    a.append(origfile)
+    subprocess.call(a)
 
 def do_sequence(origfile, startf, nframes, targets):
     a = [ script, "--gpu", "--model", model, "--target", targets, "--basefile", basefile, "--deepdraw", dd_octaves, "--frames", str(nframes), "--zoom", zoom, "--initial", str(startf), origfile, outdir ]
@@ -45,6 +54,7 @@ i = startframe
 f = int(frames)
 lastfile = origfile
 
+do_start()
 
 steps = [ (n + 1) * 1.0 / nsteps for n in range(nsteps) ]
 

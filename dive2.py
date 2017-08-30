@@ -5,20 +5,18 @@ import sys, os, os.path
 import subprocess
 import string
 
-#origfile = 'Input/base.jpg'
-origfile = 'Output/Dive6/manga_f46560.jpg'
+origfile = 'Input/base.jpg'
 origsize = '320x240'
 outdir = 'Output'
 script = './dream.py'
-model = 'manga_tag'
-# model = 'googlenet'
-recipe = range(486,512)
+model = 'manga'
+recipe = 'Features/latham_5.json' 
 iters = '2'
 octaves = '5'
-dd_octaves = 'Manga/manga_dive_light.json'
+dd_octaves = 'Manga/manga_vec_dive_light.json'
 frames = '6'
 basefile = 'Dive6/manga'
-startframe = 46561 
+startframe = 1 
 zoom = '0.01'
 
 nsteps = 8 
