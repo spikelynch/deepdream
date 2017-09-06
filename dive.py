@@ -10,23 +10,24 @@ import string
 origfile = 'Input/start.jpg'
 origsize = '512x384'
 
-bgparams = [ 'Scripts/background.sh', origsize, "color", "8", "70", "gradient:gray90-gray10", "10%,90%", "0x8" ]
+bgparams = [ 'Scripts/background.sh', origsize, "gray", "8", "70", "gradient:gray90-gray10", "10%,90%", "0x8" ]
 
-outdir = 'Manga/Dive'
+outdir = 'Manga/Dive3'
 script = './dream.py'
 model = 'manga_tag'
 # model = 'googlenet'
-recipe = range(8) 
+recipe = range(512, 1023) 
 iters = '2'
 octaves = '5'
 dd_octaves = 'Manga/manga_dive_3.json'
-frames = '36'
+frames = '12'
 basefile = 'manga'
 startframe = 1 
-zoom = '0.001'
+zoom = '0.001' 
+glide = None
 
 nsteps = 8 
-nbetween = 8
+nbetween = 4
 
 def do_start():
     a = bgparams
