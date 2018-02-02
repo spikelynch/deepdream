@@ -5,19 +5,21 @@ import subprocess
 import string
 
 COLORFILE = '/shared/homes/mlynch/neuralgae/src/rgb.txt'
-LAYERFILE = './Layers/high_layers.txt'
+LAYERFILE = './Layers/vgg_good.txt'
+
+INPUTS = [ 'IMG_5424', 'IMG_5521', 'IMG_5654', 'IMG_6480', 'IMG_6638' ]
 
 script = './dream.py'
 origfile = './working/bg1.jpg'
-model = 'googlenet'
-const_layer = 'inception_4d/pool_proj'
-iters = 800
+model = 'vgg'
+const_layer = 'pool5'
+iters = 10
 iterstep = 0
 octaves = 4 
-repeats = 80 
-width = 512 
-height = 384
-path = './Output/Google77'
+repeats = 20 
+width = 1024 
+height = 768
+path = './Output/VGGSample'
 
 fsin = 'Sinusoid {},90'
 
@@ -27,12 +29,12 @@ oc = [ './Scripts/background.sh', str(width) + 'x' + str(height), 'gray', '10', 
 
 #oc = [ './Scripts/sparse2.py', '--width', str(width), '--height', str(height), '--colours', '4', '--points', '8', '--blend', '50', '--algorithm', 'voronoi', '--blgorithm', 'shepards', '--blur', '0x8' ]
 
-layers = [ 'pool5/7x7_s1' ]
-#with open(LAYERFILE, 'r') as lf:
-#    for x in lf:
-#        x = x.strip('\n')
-#        fields = x.split()
-#        layers.append(fields[0])
+layers = [  ]
+with open(LAYERFILE, 'r') as lf:
+    for x in lf:
+        x = x.strip('\n')
+        fields = x.split()
+        layers.append(fields[0])
 
         
 colors = []
@@ -112,11 +114,10 @@ def init_ripple(oc):
 
 
 
-for i in range(0, repeats):
-    start = init_perlin(oc, i)
-    layer = random.choice(layers)
-    iters += iterstep
-    basefile = 'image{}.jpg'.format(i)
-    a = [ script, "--gpu", "--model", model, "--layer", layer, "--iters", str(iters), "--octaves", str(octaves), "--basefile", basefile, start, path ]
-    print ' '.join(a)
-    subprocess.call(a)
+for layer in layers:
+    for start in INPUTS:
+        basefile = '{}_{}'.format(start, layer)
+        infile = 'Input/{}.jpg'.format(start)
+        a = [ script, "--gpu", "--model", model, "--layer", layer, "--iters", str(iters), "--octaves", str(octaves), "--basefile", basefile, infile, path ]
+        print ' '.join(a)
+        subprocess.call(a)

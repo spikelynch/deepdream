@@ -3,32 +3,29 @@
 import sys, os, os.path
 import subprocess
 import string
+from classes import ImageCategories
 
-origfile = './Input/manga.jpg'
-model = 'manga_tag'
-recipe = 'Layers/layers_manga_features.txt'
+origfile = './Input/vgg_bg.jpg'
+model = 'vgg'
+recipe = 'Layers/vgg.txt'
+# bg = [ 'Scripts/background.sh', "224x224", "gray", "8", "70", "gradient:gray90-gray10", "10%,90%", "0x8", origfile ]
+bg = [ "convert", "-size", "224x224", "-colorspace", "RGB", "-type", "truecolor", "canvas:gray60" ] 
 script = './dream.py'
-iters = '40'
-path = './Output/MFeatures/'
+iters = '10'
+path = './Output/VGGDD4/'
+ddspec = '../neuralgae/src/Control/Renderers/VGG/octaves009.json'
+classdir = './Classes/'
 
-content = None
-
-with open(recipe) as f:
-    content = [ x.strip('\n') for x in f.readlines() ]
-
-if not content:
-    sys.exit()
-
-layers = []
-    
-for line in content:
-    fields = line.split()
-    layers.append(fields[0])
+ic = ImageCategories(classdir, model)
 
 
-for layer in layers:
-    layerpath = layer.replace('/', '_')
+for t in range(0, 1000):
+    name = ic.name(t)
+    name = name.replace(' ', '_')
+    layerpath = "class_{}_{}".format(t, name)
     print layerpath
-    a = [ script, "--model", model, "--layer", layer, "--iters", iters, "--basefile", layerpath + '.jpg', origfile, path ]
+    subprocess.call(bg)
+    target = '{"' + str(t) + '": 1}'
+    a = [ script, "--gpu", "--deepdraw", ddspec, "--target", target, "--model", model, "--basefile", layerpath, origfile, path ]
     print ' '.join(a)
     subprocess.call(a)

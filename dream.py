@@ -28,6 +28,7 @@ Caffe installation
 MODELS = {
     'googlenet': 'bvlc_googlenet',
     'places': 'googlenet_places205',
+    'vgg': 'VGG_ILSVRC_19_layers',
     'oxford': 'oxford102',
     'cnn_age': 'cnn_age',
     'cnn_gender': 'cnn_gender',
@@ -42,6 +43,7 @@ MODELS = {
 DEFAULT_LAYERS = {
     'googlenet': 'inception_4c/output',
     'places': 'inception_4c/output',
+    'vgg': 'pool5',
     'cnn_age': 'pool5',
     'cnn_gender': 'pool5',
     'oxford': 'pool5',
@@ -64,7 +66,8 @@ CLASS_TARGET_LAYER = {
     'ilsvrc13': 'fc-rcnn',
     'caffenet': 'fc8',
     'manga': 'encode1neuron',
-    'manga_tag': 'conv6_4'
+    'manga_tag': 'conv6_4',
+    'vgg': 'prob'
 }
 
 N_CLASSES = {
@@ -428,6 +431,7 @@ def parse_classes(s, w):
         return jt
     numeric_re = re.compile('^[0-9,-]*$')
     if numeric_re.search(s):
+        print "Got number-looking thing " + s
         il = []
         for c1 in s.split(','):
             c2 = c1.split('-')
@@ -448,6 +452,7 @@ def parse_classes(s, w):
 
 
 def json_parse_classes(mjs):
+    print "trying JSON parse of " + mjs
     try:
         js = json.loads(mjs)
         return js
@@ -619,6 +624,7 @@ if __name__ == '__main__':
         if not foci:
             print "Empty targets"
             foci = []
+        print "FOCI"
         print foci
         layer = CLASS_TARGET_LAYER[args.model]
         dd_octaves = DD_OCTAVES

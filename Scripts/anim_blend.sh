@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 
-model="googlenet"
+model="manga_tag"
 size="224"
-target="496"
+target="{\"34\":1}"
 sigma=".3"
-dir="./Animations/Xmas/"
-working="./Animations/Xmas/working"
+dir="./Animations/Test/"
+working="./Animations/Test/working"
 lastframe=""
 firstframe=""
-iters="200"
+iters="500"
 blend="5"
 lblend="10"
 
@@ -34,7 +34,7 @@ for i in `seq 0 10 359`; do
         cp ${working}/base_${i}.jpg ${working}/blended_${i}.jpg
     fi
        
-    ./dream.py --model $model --iters $iters --target $target --sigma $sigma --basefile frame_${i} ${working}/blended_${i}.jpg ${dir}
+    ./dream.py --gpu --model $model --iters $iters --target $target --sigma $sigma --basefile frame_${i} ${working}/blended_${i}.jpg ${dir}
     lastframe="${dir}/frame_${i}.jpg"
     if [ -n "${firstframe}" ]; then
         firstframe="${lastframe}"
@@ -42,7 +42,7 @@ for i in `seq 0 10 359`; do
 done
 
 ./rename.py $dir
-./gifenc.sh ${dir}/frame_%d.jpg ${dir}/anim.gif
+#./gifenc.sh ${dir}/frame_%d.jpg ${dir}/anim.gif
 
 #rm ${dir}/gray4_*.jpg
 #rm ${dir}/base4_*.jpg

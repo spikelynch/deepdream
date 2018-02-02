@@ -7,27 +7,26 @@ import string
 
 
 
-origfile = 'Input/start.jpg'
+origfile = 'Input/dive_start.jpg'
 origsize = '512x384'
 
-bgparams = [ 'Scripts/background.sh', origsize, "gray", "8", "70", "gradient:gray90-gray10", "10%,90%", "0x8" ]
+bgparams = [ 'convert', "-size", origsize, "-colorspace", "RGB", "-type", "truecolor", "canvas:gray60"  ]
 
-outdir = 'Manga/Dive3'
+outdir = 'VGGDive'
 script = './dream.py'
-model = 'manga_tag'
-# model = 'googlenet'
-recipe = range(512, 1023) 
+model = 'vgg'
+recipe = range(1000) 
 iters = '2'
 octaves = '5'
-dd_octaves = 'Manga/manga_dive_3.json'
-frames = '12'
-basefile = 'manga'
+dd_octaves = 'Input/vgg_dive.json'
+frames = '8'
+basefile = 'vggdive'
 startframe = 1 
-zoom = '0.001' 
+zoom = '0.04' 
 glide = None
 
-nsteps = 8 
-nbetween = 4
+nsteps = 4 
+nbetween = 8
 
 def do_start():
     a = bgparams
