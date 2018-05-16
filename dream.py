@@ -29,6 +29,8 @@ MODELS = {
     'googlenet': 'bvlc_googlenet',
     'places': 'googlenet_places205',
     'vgg': 'VGG_ILSVRC_19_layers',
+    'vgg16': 'VGG_ILSVRC_16_layers',
+    'cars': 'cars',
     'oxford': 'oxford102',
     'cnn_age': 'cnn_age',
     'cnn_gender': 'cnn_gender',
@@ -44,6 +46,8 @@ DEFAULT_LAYERS = {
     'googlenet': 'inception_4c/output',
     'places': 'inception_4c/output',
     'vgg': 'pool5',
+    'vgg16': 'pool5',
+    'cars': 'pool5',
     'cnn_age': 'pool5',
     'cnn_gender': 'pool5',
     'oxford': 'pool5',
@@ -60,19 +64,23 @@ CLASS_TARGET_LAYER = {
     'places': 'loss3/classifier',
     'oxford': 'fc8_oxford_102',
     'flickr_style': 'fc8_flickr',
-    'cars': 'fc8',
+    'cars': 'prob',
     'cnn_age': 'fc8',
     'cnn_gender': 'fc8',
     'ilsvrc13': 'fc-rcnn',
     'caffenet': 'fc8',
     'manga': 'encode1neuron',
     'manga_tag': 'conv6_4',
-    'vgg': 'prob'
+    'vgg': 'prob',
+    'vgg16': 'prob'
 }
 
 N_CLASSES = {
     'googlenet': 1000,
     'caffenet': 1000,
+    'vgg': 1000,
+    'vgg16': 1000,
+    'cars': 431,
     'manga': 4096,
     'places': 205,
     'manga_tag': 1538
@@ -89,6 +97,8 @@ DD_OCTAVES = [
         'end_step_size':1.5
     },
 ]
+
+VERBOSE = 'dump'
 
     
 MAGIC_TARGETS = [ 'randomise' ]
@@ -269,7 +279,7 @@ def make_step(net, step_size=1.5, end=default_layer, jitter=32, clip=True, objec
 
 
 
-def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_scale=1.4, tiling=False, end=default_layer, clip=True, **step_params):
+def deepdream(net, base_img, bfile, verbose_n=0, iter_n=10, octave_n=4, octave_scale=1.4, tiling=False, end=default_layer, clip=True, **step_params):
     # prepare base images for all octaves
 
     octaves = [preprocess(net, base_img)]
@@ -306,14 +316,15 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
                 if not clip: # adjust image contrast if clipping is disabled
                     vis = vis*(255.0/np.percentile(vis, 99.98))
                 print octave, i, end
-                if verbose_file:
-                    filename = "%s_%d_%i.jpg" % ( verbose_file, octave, i )
-                    writearray(vis, filename)
-                    print "Wrote %s" % filename
+                if verbose_n:
+                    if i % verbose_n == 0:
+                        filename = "%s_%s_%d_%d.jpg" % ( bfile, VERBOSE, octave, i )
+                        writearray(vis, filename)
+                        print "Wrote %s" % filename
 
             # extract details produced on the current octave
             detail = src.data[0] - octave_base
-            writearray(deprocess(net, detail), "detail_%d.jpg" % octave)
+            writearray(deprocess(net, detail), "%s_detail_%d.jpg" % ( bfile, octave ))
         else:
 #            image.reshape(1, 3, h, w)
             image = octave_base + detail
@@ -343,7 +354,7 @@ def deepdream(net, base_img, verbose_file=None, iter_n=10, octave_n=4, octave_sc
 # have reverted this to the original code allowing multiple octaves as the
 # tiling stuff was bad and slow
 
-def deepdraw(net, base_img, verbose_file=None, random_crop=True, octaves=DD_OCTAVES, end=default_layer, clip=True,  **step_params):
+def deepdraw(net, base_img, bfile, verbose_n=None, random_crop=True, octaves=DD_OCTAVES, end=default_layer, clip=True,  **step_params):
 
     # prepare base image
 
@@ -403,12 +414,12 @@ def deepdraw(net, base_img, verbose_file=None, random_crop=True, octaves=DD_OCTA
             
             make_step(net, end=layer, clip=clip, sigma=sigma, step_size=step_size, **step_params)
 
-            if verbose_file:
+            if verbose_n:
                 vis = deprocess(net, src.data[0])
                 if not clip: # adjust image contrast if clipping is disabled
                     vis = vis*(255.0/np.percentile(vis, 99.98))
-                if i % 1 == 0:
-                    writearray(vis,os.path.join(verbose_file, "dd_frame"+str(vi)+".jpg"))
+                if i % verbose_n == 0:
+                    writearray(vis,"%s_%s_%i.jpg" % ( bfile, VERBOSE, vi))
                     vi += 1
             
             if i % 10 == 0:
@@ -417,8 +428,7 @@ def deepdraw(net, base_img, verbose_file=None, random_crop=True, octaves=DD_OCTA
             # insert modified image back into original image (if necessary)
             image[:,ox:ox+w,oy:oy+h] = src.data[0]
         
-        #print "octave %d image:" % e
-        #writearray(deprocess(net, image),"./octave_"+str(e)+".jpg")
+        writearray(deprocess(net, image),"%s_octave_%s.jpg" % ( bfile, e ))
             
     # returning the resulting image
     return deprocess(net, image)    
@@ -522,7 +532,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--deepdraw", type=str, default=None, help="Deepdraw octaves (JSON file)")
     parser.add_argument("-s", "--sigma", type=float, help="Blur (sigma)", default=0)
     parser.add_argument("-u", "--glide", type=str, help="Glide between frames x,y", default=None)
-    parser.add_argument("-v", "--verbose", type=str, help="Dump out a file for every iteration", default=None)
+    parser.add_argument("-v", "--verbose", type=int, help="Dump a file every n iterations", default=0)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=0)
     parser.add_argument("-r", "--rotate", type=int, help="Rotate in degrees", default=0)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
@@ -572,11 +582,7 @@ if __name__ == '__main__':
     # TODO: if bfile exists, add something to its name 
     if not ('nojson' in args and args.nojson ): 
         write_json(bfile, vars(args))
-
-    vfile = None
-    if args.verbose:
-        vfile = args.verbose
-
+    
     print "Loading %s" % origfile
 
     img = np.float32(PIL.Image.open(origfile))
@@ -612,7 +618,7 @@ if __name__ == '__main__':
         guide = np.float32(PIL.Image.open(args.guide))
         guide_layer = args.guidelayer
         obj_guide = make_objective_guide(net, guide, guide_layer)
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
+        dreamer = lambda x: deepdream(net, x, bfile, verbose_n=args.verbose, iter_n=args.iters, octave_n=args.octaves, end=layer, objective=obj_guide)
     elif args.target is not None:
         if args.model not in CLASS_TARGET_LAYER:
             print "Can't do deepdraw on this model"
@@ -633,9 +639,10 @@ if __name__ == '__main__':
             with open(args.deepdraw) as ddj:
                 dd_octaves = json.load(ddj)
         obj_class = make_objective_target(net, foci)
-        dreamer = lambda x: deepdraw(net, x, verbose_file=args.verbose, octaves=dd_octaves, end=layer, objective=obj_class)
+        dreamer = lambda x: deepdraw(net, x, bfile, verbose_n=args.verbose, octaves=dd_octaves, end=layer, objective=obj_class)
     else:
-        dreamer = lambda x: deepdream(net, x, verbose_file=vfile, iter_n=args.iters, octave_n=args.octaves, sigma=args.sigma, end=layer)
+        dreamer = lambda x: deepdream(net, x, bfile, verbose_n=args.verbose, iter_n=args.iters, octave_n=args.octaves, sigma=args.sigma, end=layer)
+
 
     # default value of args.frames is 1
 

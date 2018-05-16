@@ -5,21 +5,21 @@ import subprocess
 import string
 
 COLORFILE = '/shared/homes/mlynch/neuralgae/src/rgb.txt'
-LAYERFILE = './Layers/vgg_good.txt'
+LAYERFILE = './Layers/layers_low.txt'
 
 INPUTS = [ 'IMG_5424', 'IMG_5521', 'IMG_5654', 'IMG_6480', 'IMG_6638' ]
 
 script = './dream.py'
-origfile = './working/bg1.jpg'
-model = 'vgg'
+origfile = './'
+infile = 'Input/clyde_bigger.jpg'
+model = 'places'
 const_layer = 'pool5'
-iters = 10
+iters = 20
 iterstep = 0
-octaves = 4 
-repeats = 20 
+octaves = 10 
 width = 1024 
 height = 768
-path = './Output/VGGSample'
+path = './Output/ClydePlacesBigger'
 
 fsin = 'Sinusoid {},90'
 
@@ -115,9 +115,7 @@ def init_ripple(oc):
 
 
 for layer in layers:
-    for start in INPUTS:
-        basefile = '{}_{}'.format(start, layer)
-        infile = 'Input/{}.jpg'.format(start)
-        a = [ script, "--gpu", "--model", model, "--layer", layer, "--iters", str(iters), "--octaves", str(octaves), "--basefile", basefile, infile, path ]
-        print ' '.join(a)
-        subprocess.call(a)
+    basefile = "clyde_{}".format(layer.replace('/', '_'))
+    a = [ script, "--gpu", "--model", model, "--layer", layer, "--iters", str(iters), "--octaves", str(octaves), "--basefile", basefile, infile, path ]
+    print ' '.join(a)
+    subprocess.call(a)

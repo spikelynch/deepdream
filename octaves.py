@@ -6,7 +6,7 @@ import string, random
 
 DEFAULT_OCTAVE = {
     "layer": "prob",
-    "iter_n": 2000,
+    "iter_n": 1000,
     "start_sigma": 1.0,
     "end_sigma": 1.0,
     "start_step_size": 2.5,
@@ -15,11 +15,11 @@ DEFAULT_OCTAVE = {
  
 
 origfile = './Input/vgg_bg.jpg'
-model = 'vgg'
+model = 'vgg16'
 # bg = [ 'Scripts/background.sh', "224x224", "gray", "8", "70", "gradient:gray90-gray10", "10%,90%", "0x8", origfile ]
-bg = [ "convert", "-size", "224x224", "-colorspace", "RGB", "-type", "truecolor", "canvas:gray80", origfile ]
+bg = [ "convert", "-size", "320x320", "-colorspace", "RGB", "-type", "truecolor", "canvas:gray", origfile ]
 script = './dream.py'
-path = './Output/MangaMatrix1'
+path = './Output/VGG16Matrix'
 
 def rand_octaves(fn):
     o = {
@@ -44,7 +44,7 @@ def make_octaves(fn, values):
 
 
 def rand_targets(fn):
-    ts = random.sample(range(1, 511), 4)
+    ts = random.sample(range(1000), 3)
     targetjs = {}
     for t in ts:
         targetjs[str(t)] = 1.0
@@ -61,18 +61,29 @@ rand_targets(tfile)
 
 subprocess.call(bg)
 
-NRANGE = 20 
-SIGMA = 2.0
-SIGMA_S = 0.5
-STEP = 2.5 
+NRANGE = 10 
+SIGMA_MIN = 0.1
+SIGMA_MAX = 0.4
+SIGMA_START = 1.2
+STEP_MIN = 1
+STEP_MAX = 8
+STEP_START = 1.2
 SCALE = 4.0
 
 def xyoctaves(x, y):
     x0 = x / (0.0 + NRANGE)
     y0 = y / (0.0 + NRANGE)
+#    step = STEP_MIN + x0 * ( STEP_MIN - STEP_MAX )
+#    sigma = SIGMA_MIN + y0 * ( SIGMA_MIN - SIGMA_MAX )
+    step = STEP_MIN + x0 * ( STEP_MAX - STEP_MIN )
+    sigma = SIGMA_MIN + y0 * ( SIGMA_MAX - SIGMA_MIN )
+
+
     return {
-        "start_sigma": 2.0 * x0,
-        "end_sigma": .5 + 2.0 * y0
+        "start_step_size": step * STEP_START,
+        "end_step_size": step,
+        "start_sigma": sigma * SIGMA_START,
+        "end_sigma": sigma
     }
  
 for x in range(0, NRANGE + 1):
