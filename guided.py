@@ -4,17 +4,18 @@ import sys, os, os.path
 import subprocess
 import string
 
-origfile = 'Input/noise.jpg'
-guide = 'Input/Cells1.jpg'
-recipe = 'Layers/inception_output_layers.txt'
+origfile = 'Input/Greyfriars_small.jpg'
+guides = [ 'instructions', 'leaves', 'teddy' ]
+layers = 'Layers/vgg.txt'
 script = './dream.py'
-path = 'CellNoise'
-iters = '25'
-octaves = '4'
+output = 'Output/GuideMatrix'
+
+iters = '10'
+octaves = '8' 
 
 content = None
 
-with open(recipe) as f:
+with open(layers) as f:
     content = [ x.strip('\n') for x in f.readlines() ]
 
 if not content:
@@ -22,12 +23,12 @@ if not content:
 
 tt = string.maketrans('/', '_')
 
-for line in content:
-    fields = line.split()
-    model = fields[0]
-    layer = fields[1]
-    safelayer = os.path.join(path, model + '_' + layer.translate(tt))
-    a = [ script, "--guide", guide, "--guidelayer", layer, "--model", model, "--layer", "inception_4c/output", "--basefile", safelayer, "--iters", iters, "--octaves", octaves, origfile]
-    print ' '.join(a)
-    subprocess.call(a)
+for layer in content:
+    for guidelayer in content:
+        for g in guides:
+            gfile = "Input/Guides/{}_sm.jpg".format(g)
+            bfile = "{}.{}.{}".format(g, layer, guidelayer)
+            a = [ script, "--gpu", "--guide", gfile, "--guidelayer", guidelayer, "--model", "vgg", "--layer", layer, "--basefile", bfile, "--iters", iters, "--octaves", octaves, origfile, output ]
+            print ' '.join(a)
+            subprocess.call(a)
 
