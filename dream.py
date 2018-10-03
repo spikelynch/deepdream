@@ -1,4 +1,7 @@
-#!/usr/bin/env python2
+#!/shared/homes/mlynch/pycaffe27/bin/python
+
+
+#### #!/usr/bin/env python2
 # imports and basic notebook setup
 from cStringIO import StringIO
 import numpy as np
@@ -41,6 +44,8 @@ MODELS = {
     'manga_tag' : 'illustration2vec_tag'
 #    'cars' : 'cars'
 }
+
+DUMP_DETAIL = False;
 
 DEFAULT_LAYERS = {
     'googlenet': 'inception_4c/output',
@@ -324,7 +329,8 @@ def deepdream(net, base_img, bfile, verbose_n=0, iter_n=10, octave_n=4, octave_s
 
             # extract details produced on the current octave
             detail = src.data[0] - octave_base
-            writearray(deprocess(net, detail), "%s_detail_%d.jpg" % ( bfile, octave ))
+            if DUMP_DETAIL:
+                writearray(deprocess(net, detail), "%s_detail_%d.jpg" % ( bfile, octave ))
         else:
 #            image.reshape(1, 3, h, w)
             image = octave_base + detail
@@ -341,7 +347,8 @@ def deepdream(net, base_img, bfile, verbose_n=0, iter_n=10, octave_n=4, octave_s
                         print src.data[0].shape
                         put_tile(image, src.data[0], x, y, w0, h0)
             detail = image - octave_base
-            writearray(deprocess(net, detail), "detail_%d.jpg" % octave)
+            if DUMP_DETAIL:
+                writearray(deprocess(net, detail), "detail_%d.jpg" % octave)
 
     # returning the resulting image
     if not tiling:
@@ -437,7 +444,7 @@ def parse_classes(s, w):
     if s == 'nil':
         return {}
     jt = json_parse_classes(s)
-    if jt:
+    if jt and type(jt) == dict:
         return jt
     numeric_re = re.compile('^[0-9,-]*$')
     if numeric_re.search(s):
@@ -534,7 +541,7 @@ if __name__ == '__main__':
     parser.add_argument("-u", "--glide", type=str, help="Glide between frames x,y", default=None)
     parser.add_argument("-v", "--verbose", type=int, help="Dump a file every n iterations", default=0)
     parser.add_argument("-z", "--zoom", type=float, help="Zoom factor", default=0)
-    parser.add_argument("-r", "--rotate", type=int, help="Rotate in degrees", default=0)
+    parser.add_argument("-r", "--rotate", type=float, help="Rotate in degrees", default=0)
     parser.add_argument("-f", "--frames", type=int, help="Number of frames", default=1)
     parser.add_argument("-j", "--initial", type=int, help="Initial frame #", default=0)
     parser.add_argument("-k", "--keys", action='store_true', help="Dump a list of available layers", default=False)
